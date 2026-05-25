@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import { createClient } from "@supabase/supabase-js";
+
 const SUPABASE_URL = "https://xxbrrtyuqrbypaqioqfq.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh4YnJydHh1cXJieXBhcWlvcWZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2OTY1MzMsImV4cCI6MjA5NTI3MjUzM30.dfVWR8PW52_CyqJUd1bnZCoWhefZNgSOlWo5783akHE";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -37,7 +38,7 @@ function buildPlayers(fechas) {
     });
     const paid = fechas.map(f => f.pagos[name] ?? 0);
     const wins = fechas.map(f => f.daily_wins[name] ?? 0);
-    const datesPlayed = scores.filter(s => s > 0).length;
+    const datesPlayed = fechas.filter(f => (f.resultados[name] ?? 0) > 0).length;
     const total = calcTotalPoints(scores);
     return { name, scores, paid, wins, datesPlayed, total };
   });
@@ -55,6 +56,7 @@ function AcarreosHoliCup() {
   const [finalScores, setFinalScores]   = useState({});
   const [finalClosed, setFinalClosed]   = useState(false);
   const [loading, setLoading]           = useState(true);
+  const [error, setError]               = useState(null);
 
   useEffect(() => {
     loadFechas();
@@ -66,8 +68,15 @@ function AcarreosHoliCup() {
   }, []);
 
   async function loadFechas() {
-    const { data } = await supabase.from('fechas').select('*').order('id');
-    if (data) { setFechas(data); setLoading(false); }
+    try {
+      const { data, error } = await supabase.from('fechas').select('*').order('id');
+      if (error) { setError(error.message); setLoading(false); return; }
+      setFechas(data || []);
+      setLoading(false);
+    } catch(e) {
+      setError(e.message);
+      setLoading(false);
+    }
   }
 
   async function handleAddDate() {
@@ -113,8 +122,16 @@ function AcarreosHoliCup() {
   })) : [];
 
   if (loading) return (
-    <div style={{minHeight:"100vh",background:"#0a0f1e",display:"flex",alignItems:"center",justifyContent:"center",color:"#c8a84b",fontFamily:"Georgia,serif",fontSize:18}}>
-      Cargando... ⛳
+    <div style={{minHeight:"100vh",background:"#0a0f1e",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",color:"#c8a84b",fontFamily:"Georgia,serif",gap:16}}>
+      <div style={{fontSize:32}}>⛳</div>
+      <div style={{fontSize:18}}>Cargando...</div>
+    </div>
+  );
+
+  if (error) return (
+    <div style={{minHeight:"100vh",background:"#0a0f1e",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",color:"#e87f7f",fontFamily:"Georgia,serif",gap:16,padding:20}}>
+      <div style={{fontSize:32}}>⚠</div>
+      <div style={{fontSize:14,textAlign:"center"}}>Error: {error}</div>
     </div>
   );
 
@@ -213,7 +230,7 @@ function AcarreosHoliCup() {
 
         {activeTab==="historial"&&(
           <div>
-            {fechas.map((f,di)=>{
+            {fechas.map((f)=>{
               const dr = Object.entries(f.resultados).sort(([,a],[,b])=>b-a);
               return (
                 <div key={f.id} style={{marginBottom:"20px",borderRadius:"12px",border:`1px solid ${f.es_playoff?"rgba(168,127,232,0.3)":"rgba(200,168,75,0.2)"}`,overflow:"hidden",background:"rgba(255,255,255,0.03)"}}>
