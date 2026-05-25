@@ -103,7 +103,7 @@ function AcarreosHoliCup() {
   return (
     <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#0a0f1e 0%,#0d2137 50%,#0a1a0f 100%)",fontFamily:"Georgia,serif",color:"#e8dcc8"}}>
       <div style={{background:"linear-gradient(180deg,#1a3a1a 0%,#0d2137 100%)",borderBottom:"3px solid #c8a84b",padding:"32px 20px 20px",textAlign:"center"}}>
-        <div style={{fontSize:"13px",letterSpacing:"4px",color:"#c8a84b",marginBottom:"8px"}}>⛳ Copa Oficial ⛳</div>
+        <div style={{fontSize:"13px",letterSpacing:"4px",color:"#c8a84b",marginBottom:"8px"}}>⛳ 2026 ⛳</div>
         <h1 style={{margin:0,fontSize:"clamp(28px,7vw,52px)",fontWeight:"900",color:"#fff",lineHeight:1.1}}>
           ACARREOS<br/><span style={{color:"#c8a84b"}}>HOLI CUP</span>
         </h1>
