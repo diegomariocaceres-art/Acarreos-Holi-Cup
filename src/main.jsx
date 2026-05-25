@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom/client";
-import { createClient } from "@supabase/supabase-js";
-
+const { createClient } = window.supabase;
 const SUPABASE_URL = "https://xxbrrtyuqrbypaqioqfq.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh4YnJydHh1cXJieXBhcWlvcWZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2OTY1MzMsImV4cCI6MjA5NTI3MjUzM30.dfVWR8PW52_CyqJUd1bnZCoWhefZNgSOlWo5783akHE";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
