@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Robin 4Somes</title>
+  <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js" crossorigin></script>
+</head>
+<body style="margin:0;background:#0a0a0a">
+<div id="root"></div>
+<script>
+const { useState, useEffect } = React;
+const e = React.createElement;
+
+const COURSES = {
+  "Miami Beach": {
+    par: 72,
+    tees: {
+      "Black": { rating: 74.1, slope: 142 },
+      "Blue": { rating: 72.2, slope: 138 },
+      "White": { rating: 70.1, slope: 133 },
+      "Blue/White": { rating: 71.2, slope: 136 },
+      "Gold": { rating: 68.0, slope: 125 },
+    }
+  },
+  "Normandy Shores": {
+    par: 71,
+    tees: {
+      "Black": { rating: 72.5, slope: 129 },
+      "White": { rating: 70.0, slope: 124 },
+      "Blue/White": { rating: 71.2, slope: 127 },
+    }
+  },
+  "Miami Shores": {
+    par: 71,
+    tees: {
+      "Black": { rating: 70.0, slope: 122 },
+      "White": { rating: 68.0, slope: 117 },
+      "Blue/White": { rating: 69.0, slope: 120 },
+    }
+  },
+  "Miami Lakes": {
+    par: 72,
+    tees: {
+      "Black": { rating: 72.5, slope: 128 },
+      "Gold": { rating: 69.2, slope: 125 },
+      "White": { rating: 66.8, slope: 119 },
+    }
+  },
+  "Turnberry Soffer": {
+    par: 70,
+    tees: {
+      "Black": { rating: 72.2, slope: 138 },
+      "Blue": { rating: 70.3, slope: 131 },
+      "Blue/White": { rating: 69.6, slope: 129 },
+      "White": { rating: 68.1, slope: 121 },
+    }
+  },
+  "Biltmore": {
+    par: 71,
+    tees: {
+      "Black": { rating: 74.3, slope: 132 },
+      "Blue": { rating: 71.2, slope: 126 },
+      "White": { rating: 69.2, slope: 122 },
+      "Blue/White": { rating: 70.2, slope: 124 },
+    }
+  },
+  "Crandon": {
+    par: 72,
+    tees: {
+      "Black": { rating: 75.1, slope: 146 },
+      "Blue": { rating: 73.7, slope: 142 },
+      "Blue/White": { rating: 72.8, slope: 139 },
+      "White": { rating: 71.8, slope: 135 },
+      "Green": { rating: 69.0, slope: 126 },
+    }
+  },
+};
+
+const GOLD = "#c8a84b";
+const GREEN = "#4bc87a";
+const RED = "#e87f7f";
+const PURPLE = "#a87fe8";
+const BG = "#0a0f1e";
+const CARD = "rgba(255,255,255,0.04)";
+const BORDER = "rgba(200,168,75,0.2)";
+
+function calcHandicap(hcpIndex, slope, rating, par) {
+  return Math.round(hcpIndex * (slope / 113) * 0.93 + (rating - par));
+}
+
+function calcNetScore(gross, courseHcp) {
+  return gross - courseHcp;
+}
+
+// Pair each third
+function getPairs(players, tercio) {
+  // Rotate pairs each tercio: 0=(0,1)vs(2,3), 1=(0,2)vs(1,3), 2=(0,3)vs(1,2)
+  if (tercio === 0) return [[0,1],[2,3]];
+  if (tercio === 1) return [[0,2],[1,3]];
+  return [[0,3],[1,2]];
+}
+
+function App() {
+  const [screen, setScreen] = useState("setup"); // setup | game | summary
+  const [course, setCourse] = useState("Miami Beach");
+  const [tee, setTee] = useState("Blue");
+  const [players, setPlayers] = useState([
+    {name:"Jugador 1", hcpIndex: 12},
+    {name:"Jugador 2", hcpIndex: 18},
+    {name:"Jugador 3", hcpIndex: 8},
+    {name:"Jugador 4", hcpIndex: 22},
+  ]);
+  const [base] = useState(5); // $5 por tercio
+  const [hoyos, setHoyos] = useState(
+    Array.from({length:18}, (_,i) => ({
+      num: i+1,
+      scores: [null,null,null,null], // gross scores
+      gordita: null, // player index
+      sandy: [false,false,false,false],
+      porfuerazo: [false,false,false,false],
+      multiplier: 1, // for last hole of each tercio
+    }))
+  );
+  const [currentHoyo, setCurrentHoyo] = useState(0);
+  const [editHoyo, setEditHoyo] = useState(null);
+  const [showMultiplier, setShowMultiplier] = useState(false);
+
+  const courseData = COURSES[course];
+  const teeData = courseData?.tees[tee];
+
+  // Calculate course handicaps for each player
+  const courseHcps = players.map(p =>
+    teeData ? calcHandicap(p.hcpIndex, teeData.slope, teeData.rating, courseData.par) : p.hcpIndex
+  );
+
+  // Calculate points for a single hole
+  function calcHoyoPoints(h, hoyoIdx) {
+    const tercio = Math.floor(hoyoIdx / 6);
+    const pairs = getPairs(players, tercio);
+    const netScores = h.scores.map((s,i) => s !== null ? s - courseHcps[i] : null);
+
+    // Per pair, calculate points won/lost
+    // Points: baja(low net), alta(high net), suma(combined net), putts(putts)
+    // For now putts not tracked separately - using score as proxy
+    // Points are pair vs pair
+
+    const pair1 = pairs[0]; // [i,j]
+    const pair2 = pairs[1]; // [k,l]
+
+    const p1nets = pair1.map(i => netScores[i]);
+    const p2nets = pair2.map(i => netScores[i]);
+
+    if (p1nets.some(x=>x===null) || p2nets.some(x=>x===null)) return null;
+
+    const p1low = Math.min(...p1nets);
+    const p1high = Math.max(...p1nets);
+    const p1sum = p1nets.reduce((a,b)=>a+b,0);
+    const p2low = Math.min(...p2nets);
+    const p2high = Math.max(...p2nets);
+    const p2sum = p2nets.reduce((a,b)=>a+b,0);
+
+    let pts1 = 0; // points for pair1
+
+    // Baja (low ball)
+    if (p1low < p2low) pts1 += 1;
+    else if (p2low < p1low) pts1 -= 1;
+
+    // Alta (high ball)
+    if (p1high < p2high) pts1 += 1;
+    else if (p2high < p1high) pts1 -= 1;
+
+    // Suma (combined)
+    if (p1sum < p2sum) pts1 += 1;
+    else if (p2sum < p1sum) pts1 -= 1;
+
+    // Putts - tracked as 4th point (for simplicity, skip if not entered)
+    // Using gross scores as tiebreaker for now
+
+    // Gordita: +1 to team of closest to pin (par or better)
+    if (h.gordita !== null) {
+      const gPlayer = h.gordita;
+      const gNet = netScores[gPlayer];
+      const gPar = courseData.par / 18; // approximate par per hole
+      if (gNet !== null) {
+        const isPar = h.scores[gPlayer] <= Math.round(gPar) + 1;
+        if (pair1.includes(gPlayer)) pts1 += 1;
+        else pts1 -= 1;
+      }
+    }
+
+    // Sandy: +1 per player, credited to their team
+    h.sandy.forEach((s,i) => {
+      if (s) {
+        if (pair1.includes(i)) pts1 += 1;
+        else pts1 -= 1;
+      }
+    });
+
+    // Porfuerazo: +1 per player, credited to their team
+    h.porfuerazo.forEach((p,i) => {
+      if (p) {
+        if (pair1.includes(i)) pts1 += 1;
+        else pts1 -= 1;
+      }
+    });
+
+    return { pts1, pts2: -pts1, pair1, pair2, multiplier: h.multiplier };
+  }
+
+  // Calculate tercio results
+  function calcTercio(tercioIdx) {
+    const start = tercioIdx * 6;
+    const end = start + 6;
+    const pairs = getPairs(players, tercioIdx);
+    let rawPts1 = 0;
+
+    for (let i = start; i < end; i++) {
+      const h = hoyos[i];
+      const result = calcHoyoPoints(h, i);
+      if (result) rawPts1 += result.pts1;
+    }
+
+    const mult = hoyos[end-1].multiplier || 1;
+    const finalPts1 = rawPts1 * mult;
+    const dolares = Math.abs(finalPts1) + base;
+
+    return {
+      pair1: pairs[0],
+      pair2: pairs[1],
+      rawPts1,
+      finalPts1,
+      multiplier: mult,
+      dolares,
+      winner: finalPts1 < 0 ? pairs[1] : finalPts1 > 0 ? pairs[0] : null,
+    };
+  }
+
+  // Overall balance per player
+  function calcBalance() {
+    const bal = [0,0,0,0];
+    for (let t = 0; t < 3; t++) {
+      const r = calcTercio(t);
+      if (r.winner) {
+        r.winner.forEach(i => bal[i] += r.dolares / 2);
+        const loser = r.winner === r.pair1 ? r.pair2 : r.pair1;
+        loser.forEach(i => bal[i] -= r.dolares / 2);
+      }
+    }
+    return bal;
+  }
+
+  const tercio = Math.floor(currentHoyo / 6);
+  const isLastOfTercio = (currentHoyo + 1) % 6 === 0;
+  const pairs = getPairs(players, tercio);
+  const currentH = hoyos[editHoyo ?? currentHoyo];
+  const hi = editHoyo ?? currentHoyo;
+
+  function updateHoyo(field, value) {
+    setHoyos(prev => {
+      const next = [...prev];
+      next[hi] = { ...next[hi], [field]: value };
+      return next;
+    });
+  }
+
+  function updateScore(playerIdx, val) {
+    setHoyos(prev => {
+      const next = [...prev];
+      const scores = [...next[hi].scores];
+      scores[playerIdx] = val === "" ? null : parseInt(val);
+      next[hi] = { ...next[hi], scores };
+      return next;
+    });
+  }
+
+  function toggleSandy(playerIdx) {
+    setHoyos(prev => {
+      const next = [...prev];
+      const sandy = [...next[hi].sandy];
+      sandy[playerIdx] = !sandy[playerIdx];
+      next[hi] = { ...next[hi], sandy };
+      return next;
+    });
+  }
+
+  function togglePorfuerazo(playerIdx) {
+    setHoyos(prev => {
+      const next = [...prev];
+      const porfuerazo = [...next[hi].porfuerazo];
+      porfuerazo[playerIdx] = !porfuerazo[playerIdx];
+      next[hi] = { ...next[hi], porfuerazo };
+      return next;
+    });
+  }
+
+  function nextHoyo() {
+    if (isLastOfTercio && !showMultiplier) {
+      setShowMultiplier(true);
+      return;
+    }
+    setShowMultiplier(false);
+    if (currentHoyo < 17) setCurrentHoyo(h => h + 1);
+    else setScreen("summary");
+  }
+
+  function prevHoyo() {
+    if (currentHoyo > 0) {
+      setShowMultiplier(false);
+      setCurrentHoyo(h => h - 1);
+    }
+  }
+
+  // ---- SCREENS ----
+
+  if (screen === "setup") {
+    return e('div',{style:{minHeight:"100vh",background:`linear-gradient(135deg,${BG},#0d2137)`,fontFamily:"Georgia,serif",color:"#e8dcc8",padding:20}},
+      e('div',{style:{textAlign:"center",paddingTop:40,paddingBottom:24}},
+        e('div',{style:{fontSize:13,letterSpacing:4,color:GOLD}},"⛳ ROBIN"),
+        e('h1',{style:{margin:"8px 0",fontSize:36,fontWeight:900,color:"#fff"}},"4SOMES"),
+        e('div',{style:{fontSize:12,color:"#667",letterSpacing:2}},"APUESTAS · STROKE NETO")
+      ),
+
+      // Course selector
+      e('div',{style:{marginBottom:16}},
+        e('div',{style:{fontSize:11,color:GOLD,letterSpacing:2,marginBottom:8}},"CAMPO"),
+        e('div',{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}},
+          ...Object.keys(COURSES).map(c =>
+            e('button',{key:c,onClick:()=>{setCourse(c);setTee(Object.keys(COURSES[c].tees)[0]);},
+              style:{padding:"10px 8px",borderRadius:10,background:course===c?"rgba(200,168,75,0.2)":CARD,
+              border:`1px solid ${course===c?GOLD:BORDER}`,color:course===c?GOLD:"#aaa",
+              fontSize:12,cursor:"pointer",fontFamily:"inherit",fontWeight:course===c?"bold":"normal"}},c)
+          )
+        )
+      ),
+
+      // Tee selector
+      e('div',{style:{marginBottom:20}},
+        e('div',{style:{fontSize:11,color:GOLD,letterSpacing:2,marginBottom:8}},"MARCA"),
+        e('div',{style:{display:"flex",gap:8,flexWrap:"wrap"}},
+          ...Object.keys(courseData.tees).map(t =>
+            e('button',{key:t,onClick:()=>setTee(t),
+              style:{padding:"8px 14px",borderRadius:8,background:tee===t?"rgba(200,168,75,0.2)":CARD,
+              border:`1px solid ${tee===t?GOLD:BORDER}`,color:tee===t?GOLD:"#aaa",
+              fontSize:12,cursor:"pointer",fontFamily:"inherit"}},t)
+          )
+        ),
+        teeData && e('div',{style:{marginTop:8,fontSize:11,color:"#667"}},
+          `Rating: ${teeData.rating} · Slope: ${teeData.slope} · Par: ${courseData.par}`)
+      ),
+
+      // Players
+      e('div',{style:{marginBottom:24}},
+        e('div',{style:{fontSize:11,color:GOLD,letterSpacing:2,marginBottom:8}},"JUGADORES"),
+        ...players.map((p,i) =>
+          e('div',{key:i,style:{display:"flex",alignItems:"center",gap:10,marginBottom:10,padding:"12px",background:CARD,borderRadius:10,border:`1px solid ${BORDER}`}},
+            e('div',{style:{width:28,height:28,borderRadius:"50%",background:"rgba(200,168,75,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,color:GOLD,flexShrink:0}},i+1),
+            e('input',{value:p.name,onChange:ev=>setPlayers(prev=>{const n=[...prev];n[i]={...n[i],name:ev.target.value};return n;}),
+              style:{flex:1,background:"transparent",border:"none",borderBottom:"1px solid rgba(200,168,75,0.3)",color:"#e8dcc8",fontSize:14,padding:"4px 0",fontFamily:"inherit",outline:"none"}}),
+            e('div',{style:{display:"flex",alignItems:"center",gap:6,flexShrink:0}},
+              e('span',{style:{fontSize:11,color:"#667"}},"HCP"),
+              e('input',{type:"number",min:"0",max:"54",step:"0.1",value:p.hcpIndex,
+                onChange:ev=>setPlayers(prev=>{const n=[...prev];n[i]={...n[i],hcpIndex:parseFloat(ev.target.value)||0};return n;}),
+                style:{width:50,background:"rgba(0,0,0,0.4)",border:`1px solid ${BORDER}`,borderRadius:6,color:GOLD,fontSize:14,padding:"4px 6px",textAlign:"center",fontFamily:"inherit"}})
+            )
+          )
+        )
+      ),
+
+      // Pairs preview
+      e('div',{style:{marginBottom:24,padding:14,background:"rgba(200,168,75,0.06)",border:`1px solid ${BORDER}`,borderRadius:12}},
+        e('div',{style:{fontSize:11,color:GOLD,letterSpacing:2,marginBottom:10}},"PAREJAS POR TERCIO"),
+        ...[0,1,2].map(t => {
+          const p = getPairs(players, t);
+          return e('div',{key:t,style:{marginBottom:8,display:"flex",alignItems:"center",gap:8,fontSize:13}},
+            e('span',{style:{color:"#667",width:60,flexShrink:0}},`H${t*6+1}-${t*6+6}`),
+            e('span',{style:{color:"#e8dcc8"}},`${players[p[0][0]].name} & ${players[p[0][1]].name}`),
+            e('span',{style:{color:"#667",margin:"0 6px"}},"vs"),
+            e('span',{style:{color:"#e8dcc8"}},`${players[p[1][0]].name} & ${players[p[1][1]].name}`)
+          );
+        })
+      ),
+
+      // Course handicaps
+      teeData && e('div',{style:{marginBottom:24,padding:14,background:CARD,border:`1px solid ${BORDER}`,borderRadius:12}},
+        e('div',{style:{fontSize:11,color:GOLD,letterSpacing:2,marginBottom:10}},"HANDICAPS EN CAMPO"),
+        ...players.map((p,i) =>
+          e('div',{key:i,style:{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid rgba(255,255,255,0.05)",fontSize:13}},
+            e('span',null,p.name),
+            e('span',{style:{color:GOLD}},`${p.hcpIndex} → ${courseHcps[i]} golpes`)
+          )
+        )
+      ),
+
+      e('button',{onClick:()=>setScreen("game"),
+        style:{width:"100%",padding:16,background:`linear-gradient(135deg,#1a5c1a,#0d3a20)`,
+        border:`2px solid ${GOLD}`,borderRadius:12,color:GOLD,fontSize:16,fontWeight:"bold",
+        letterSpacing:2,cursor:"pointer",fontFamily:"inherit"}},
+        "⛳ EMPEZAR RONDA"
+      )
+    );
+  }
+
+  if (screen === "game") {
+    const hoyoNum = hi + 1;
+    const tercioNum = Math.floor(hi / 6);
+    const pairsNow = getPairs(players, tercioNum);
+    const result = calcHoyoPoints(currentH, hi);
+
+    // Running tercio score
+    const start = tercioNum * 6;
+    let running1 = 0;
+    for (let i = start; i <= Math.min(hi, start+5); i++) {
+      const r = calcHoyoPoints(hoyos[i], i);
+      if (r) running1 += r.pts1;
+    }
+
+    return e('div',{style:{minHeight:"100vh",background:`linear-gradient(135deg,${BG},#0d2137)`,fontFamily:"Georgia,serif",color:"#e8dcc8"}},
+
+      // Header
+      e('div',{style:{background:"rgba(0,0,0,0.4)",borderBottom:`1px solid ${BORDER}`,padding:"16px 20px"}},
+        e('div',{style:{display:"flex",justifyContent:"space-between",alignItems:"center"}},
+          e('div',null,
+            e('div',{style:{fontSize:11,color:"#667",letterSpacing:2}},"HOYO"),
+            e('div',{style:{fontSize:32,fontWeight:900,color:GOLD,lineHeight:1}},hoyoNum)
+          ),
+          e('div',{style:{textAlign:"center"}},
+            e('div',{style:{fontSize:11,color:"#667",letterSpacing:2}},"TERCIO"),
+            e('div',{style:{fontSize:18,fontWeight:700,color:"#e8dcc8"}},[1,2,3][tercioNum]),
+            e('div',{style:{fontSize:11,color:"#667"}},`H${start+1}-${start+6}`)
+          ),
+          e('div',{style:{textAlign:"right"}},
+            e('div',{style:{fontSize:11,color:"#667",letterSpacing:2}},"PARCIAL"),
+            e('div',{style:{fontSize:22,fontWeight:900,color:running1>0?GREEN:running1<0?RED:"#667"}},
+              `${running1>0?"+":""}${running1}`
+            ),
+            e('div',{style:{fontSize:10,color:"#667"}},`${players[pairsNow[0][0]].name.split(" ")[0]} & ${players[pairsNow[0][1]].name.split(" ")[0]}`)
+          )
+        ),
+        // Pairs label
+        e('div',{style:{marginTop:10,padding:"6px 10px",borderRadius:8,background:"rgba(200,168,75,0.08)",fontSize:11,color:"#aaa",textAlign:"center"}},
+          `${players[pairsNow[0][0]].name} & ${players[pairsNow[0][1]].name}`,
+          e('span',{style:{color:"#667",margin:"0 8px"}},"vs"),
+          `${players[pairsNow[1][0]].name} & ${players[pairsNow[1][1]].name}`
+        )
+      ),
+
+      e('div',{style:{padding:16}},
+
+        // Multiplier modal for last hole of tercio
+        showMultiplier && e('div',{style:{position:"fixed",inset:0,background:"rgba(0,0,0,0.9)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,padding:20}},
+          e('div',{style:{background:"#0d2137",border:`2px solid ${GOLD}`,borderRadius:20,padding:24,width:"100%",maxWidth:340,textAlign:"center"}},
+            e('div',{style:{fontSize:28,marginBottom:8}},"⚡"),
+            e('div',{style:{fontSize:18,color:GOLD,fontWeight:"bold",marginBottom:4}}),
+            e('div',{style:{fontSize:14,color:"#aaa",marginBottom:20}},
+              `Hoyo ${hoyoNum} — fin del Tercio ${tercioNum+1}. ¿Cuánto se multiplica?`
+            ),
+            e('div',{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:16}},
+              ...[1,2,3,4,5,6].map(m =>
+                e('button',{key:m,onClick:()=>{updateHoyo("multiplier",m);},
+                  style:{padding:"14px 0",borderRadius:10,
+                  background:currentH.multiplier===m?"rgba(200,168,75,0.3)":CARD,
+                  border:`1px solid ${currentH.multiplier===m?GOLD:BORDER}`,
+                  color:currentH.multiplier===m?GOLD:"#aaa",fontSize:18,fontWeight:"bold",cursor:"pointer",fontFamily:"inherit"}},
+                  `${m}x`)
+              )
+            ),
+            e('button',{onClick:()=>{setShowMultiplier(false);if(currentHoyo<17)setCurrentHoyo(h=>h+1);else setScreen("summary");},
+              style:{width:"100%",padding:14,background:`linear-gradient(135deg,#c8a84b,#a8882b)`,border:"none",borderRadius:10,color:"#000",fontSize:15,fontWeight:"bold",cursor:"pointer",fontFamily:"inherit"}},
+              `Confirmar ${currentH.multiplier}x y continuar`)
+          )
+        ),
+
+        // Scores
+        e('div',{style:{marginBottom:16}},
+          e('div',{style:{fontSize:11,color:GOLD,letterSpacing:2,marginBottom:10}},"SCORES NETOS"),
+          ...players.map((p,i) => {
+            const net = currentH.scores[i] !== null ? currentH.scores[i] - courseHcps[i] : null;
+            return e('div',{key:i,style:{display:"flex",alignItems:"center",gap:10,marginBottom:10,padding:"12px",background:CARD,borderRadius:10,border:`1px solid ${BORDER}`}},
+              e('div',{style:{flex:1}},
+                e('div',{style:{fontSize:14,fontWeight:"bold"}},p.name),
+                e('div',{style:{fontSize:11,color:"#667"}},`HCP campo: ${courseHcps[i]}`)
+              ),
+              e('input',{type:"number",min:"1",max:"15",value:currentH.scores[i]??'',
+                onChange:ev=>updateScore(i,ev.target.value),
+                placeholder:"bruto",
+                style:{width:64,padding:"8px",borderRadius:8,background:"rgba(0,0,0,0.5)",
+                border:`1px solid ${BORDER}`,color:GOLD,fontSize:20,textAlign:"center",fontFamily:"inherit"}}),
+              net !== null && e('div',{style:{width:40,textAlign:"center"}},
+                e('div',{style:{fontSize:18,fontWeight:"bold",color:net<0?GREEN:net>0?RED:"#aaa"}},net)
+              )
+            );
+          })
+        ),
+
+        // Gordita
+        e('div',{style:{marginBottom:12,padding:"12px",background:CARD,borderRadius:10,border:`1px solid ${BORDER}`}},
+          e('div',{style:{fontSize:11,color:GOLD,letterSpacing:2,marginBottom:8}},"🏌️ GORDITA (Closest to Pin)"),
+          e('div',{style:{display:"flex",gap:8,flexWrap:"wrap"}},
+            e('button',{onClick:()=>updateHoyo("gordita",null),
+              style:{padding:"6px 12px",borderRadius:8,background:currentH.gordita===null?"rgba(200,168,75,0.2)":CARD,
+              border:`1px solid ${currentH.gordita===null?GOLD:BORDER}`,color:currentH.gordita===null?GOLD:"#667",fontSize:12,cursor:"pointer",fontFamily:"inherit"}},
+              "Nadie"),
+            ...players.map((p,i) =>
+              e('button',{key:i,onClick:()=>updateHoyo("gordita",currentH.gordita===i?null:i),
+                style:{padding:"6px 12px",borderRadius:8,background:currentH.gordita===i?"rgba(200,168,75,0.2)":CARD,
+                border:`1px solid ${currentH.gordita===i?GOLD:BORDER}`,color:currentH.gordita===i?GOLD:"#aaa",
+                fontSize:12,cursor:"pointer",fontFamily:"inherit"}},
+                p.name.split(" ")[0])
+            )
+          )
+        ),
+
+        // Sandy & Porfuerazo
+        e('div',{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}},
+          e('div',{style:{padding:"12px",background:CARD,borderRadius:10,border:`1px solid ${BORDER}`}},
+            e('div',{style:{fontSize:11,color:GOLD,letterSpacing:1,marginBottom:8}},"🏖️ SANDY"),
+            ...players.map((p,i) =>
+              e('button',{key:i,onClick:()=>toggleSandy(i),
+                style:{display:"block",width:"100%",marginBottom:4,padding:"6px 8px",borderRadius:6,
+                background:currentH.sandy[i]?"rgba(75,200,120,0.2)":CARD,
+                border:`1px solid ${currentH.sandy[i]?GREEN:BORDER}`,
+                color:currentH.sandy[i]?GREEN:"#aaa",fontSize:12,cursor:"pointer",fontFamily:"inherit",textAlign:"left"}},
+                `${currentH.sandy[i]?"✓":"○"} ${p.name.split(" ")[0]}`)
+            )
+          ),
+          e('div',{style:{padding:"12px",background:CARD,borderRadius:10,border:`1px solid ${BORDER}`}},
+            e('div',{style:{fontSize:11,color:GOLD,letterSpacing:1,marginBottom:8}},"💥 PORFUERAZO"),
+            ...players.map((p,i) =>
+              e('button',{key:i,onClick:()=>togglePorfuerazo(i),
+                style:{display:"block",width:"100%",marginBottom:4,padding:"6px 8px",borderRadius:6,
+                background:currentH.porfuerazo[i]?"rgba(168,127,232,0.2)":CARD,
+                border:`1px solid ${currentH.porfuerazo[i]?PURPLE:BORDER}`,
+                color:currentH.porfuerazo[i]?PURPLE:"#aaa",fontSize:12,cursor:"pointer",fontFamily:"inherit",textAlign:"left"}},
+                `${currentH.porfuerazo[i]?"✓":"○"} ${p.name.split(" ")[0]}`)
+            )
+          )
+        ),
+
+        // Live result for this hole
+        result && e('div',{style:{marginBottom:16,padding:"12px",background:"rgba(200,168,75,0.06)",border:`1px solid ${BORDER}`,borderRadius:10,textAlign:"center"}},
+          e('div',{style:{fontSize:11,color:"#667",marginBottom:4}},"RESULTADO HOYO"),
+          e('div',{style:{fontSize:16,fontWeight:"bold",color:result.pts1>0?GREEN:result.pts1<0?RED:"#667"}},
+            result.pts1===0 ? "Empate" :
+            result.pts1>0 ? `+${result.pts1} pts para ${players[result.pair1[0]].name.split(" ")[0]} & ${players[result.pair1[1]].name.split(" ")[0]}` :
+            `+${Math.abs(result.pts1)} pts para ${players[result.pair2[0]].name.split(" ")[0]} & ${players[result.pair2[1]].name.split(" ")[0]}`
+          )
+        ),
+
+        // Navigation
+        e('div',{style:{display:"flex",gap:12}},
+          currentHoyo > 0 && e('button',{onClick:prevHoyo,
+            style:{flex:1,padding:14,background:CARD,border:`1px solid ${BORDER}`,borderRadius:12,
+            color:"#aaa",fontSize:14,cursor:"pointer",fontFamily:"inherit"}},
+            "← Anterior"),
+          e('button',{onClick:nextHoyo,
+            style:{flex:2,padding:14,background:`linear-gradient(135deg,#1a5c1a,#0d3a20)`,
+            border:`2px solid ${GOLD}`,borderRadius:12,color:GOLD,fontSize:14,fontWeight:"bold",
+            letterSpacing:1,cursor:"pointer",fontFamily:"inherit"}},
+            currentHoyo===17 ? "🏁 Ver Resultados" : isLastOfTercio ? "⚡ Press / Siguiente →" : "Siguiente →")
+        ),
+
+        // Hoyo navigation dots
+        e('div',{style:{display:"flex",justifyContent:"center",gap:4,marginTop:16,flexWrap:"wrap"}},
+          ...hoyos.map((h,i) => {
+            const done = h.scores.some(s=>s!==null);
+            const isCurrent = i===currentHoyo;
+            return e('button',{key:i,onClick:()=>{setEditHoyo(null);setCurrentHoyo(i);setShowMultiplier(false);},
+              style:{width:28,height:28,borderRadius:"50%",
+              background:isCurrent?"rgba(200,168,75,0.4)":done?"rgba(75,200,120,0.2)":CARD,
+              border:`1px solid ${isCurrent?GOLD:done?GREEN:BORDER}`,
+              color:isCurrent?GOLD:done?GREEN:"#667",fontSize:10,cursor:"pointer",fontFamily:"inherit"}},
+              i+1)
+          })
+        )
+      )
+    );
+  }
+
+  if (screen === "summary") {
+    const bal = calcBalance();
+    const tercios = [0,1,2].map(t => calcTercio(t));
+
+    return e('div',{style:{minHeight:"100vh",background:`linear-gradient(135deg,${BG},#0d2137)`,fontFamily:"Georgia,serif",color:"#e8dcc8",padding:20}},
+      e('div',{style:{textAlign:"center",paddingTop:20,paddingBottom:20}},
+        e('div',{style:{fontSize:32}},"🏁"),
+        e('h2',{style:{margin:"8px 0",color:GOLD,letterSpacing:2}},"RESULTADOS FINALES"),
+        e('div',{style:{fontSize:12,color:"#667"}},`${course} · ${tee} · Par ${courseData.par}`)
+      ),
+
+      // Balance per player
+      e('div',{style:{marginBottom:24}},
+        e('div',{style:{fontSize:11,color:GOLD,letterSpacing:2,marginBottom:10}},"BALANCE FINAL"),
+        ...players.map((p,i) =>
+          e('div',{key:i,style:{display:"flex",alignItems:"center",padding:"14px 16px",marginBottom:8,
+            borderRadius:12,border:`1px solid ${bal[i]>0?GREEN:bal[i]<0?RED:BORDER}`,
+            background:bal[i]>0?"rgba(75,200,120,0.06)":bal[i]<0?"rgba(232,127,127,0.06)":CARD}},
+            e('div',{style:{flex:1}},
+              e('div',{style:{fontSize:16,fontWeight:"bold"}},p.name),
+              e('div',{style:{fontSize:11,color:"#667"}},`HCP Index: ${p.hcpIndex} → ${courseHcps[i]} en campo`)
+            ),
+            e('div',{style:{fontSize:24,fontWeight:900,color:bal[i]>0?GREEN:bal[i]<0?RED:"#667"}},
+              `${bal[i]>0?"+":""}$${bal[i]}`)
+          )
+        )
+      ),
+
+      // Tercio breakdown
+      e('div',{style:{marginBottom:24}},
+        e('div',{style:{fontSize:11,color:GOLD,letterSpacing:2,marginBottom:10}},"TERCIOS"),
+        ...tercios.map((t,i) =>
+          e('div',{key:i,style:{marginBottom:12,padding:"14px 16px",borderRadius:12,background:CARD,border:`1px solid ${BORDER}`}},
+            e('div',{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}},
+              e('div',{style:{fontSize:13,color:GOLD,fontWeight:"bold"}},`Tercio ${i+1} (H${i*6+1}-${i*6+6})`),
+              t.multiplier>1 && e('div',{style:{padding:"2px 8px",borderRadius:6,background:"rgba(168,127,232,0.2)",
+                border:`1px solid ${PURPLE}`,color:PURPLE,fontSize:11}},`${t.multiplier}x`)
+            ),
+            e('div',{style:{fontSize:12,color:"#aaa",marginBottom:6}},
+              `${players[t.pair1[0]].name} & ${players[t.pair1[1]].name} vs ${players[t.pair2[0]].name} & ${players[t.pair2[1]].name}`
+            ),
+            e('div',{style:{display:"flex",justifyContent:"space-between",fontSize:13}},
+              e('span',{style:{color:"#667"}},`Pts brutos: ${t.rawPts1>0?"+":""}${t.rawPts1}`),
+              e('span',{style:{color:"#667"}},`Multiplier: ×${t.multiplier}`),
+              e('span',{style:{color:GOLD,fontWeight:"bold"}},`$${t.dolares}`)
+            ),
+            t.winner && e('div',{style:{marginTop:8,padding:"6px 10px",borderRadius:8,
+              background:"rgba(75,200,120,0.1)",border:`1px solid ${GREEN}`,fontSize:12,color:GREEN}},
+              `🏆 Gana: ${players[t.winner[0]].name} & ${players[t.winner[1]].name} · +$${t.dolares/2} c/u`)
+          )
+        )
+      ),
+
+      // Hole by hole
+      e('div',{style:{marginBottom:24}},
+        e('div',{style:{fontSize:11,color:GOLD,letterSpacing:2,marginBottom:10}},"HOYOS"),
+        ...hoyos.map((h,i) => {
+          const r = calcHoyoPoints(h, i);
+          const t = Math.floor(i/6);
+          const p = getPairs(players, t);
+          if (!r) return null;
+          return e('div',{key:i,style:{display:"flex",alignItems:"center",gap:10,padding:"8px 12px",
+            marginBottom:4,borderRadius:8,background:CARD,border:`1px solid ${BORDER}`,fontSize:12}},
+            e('span',{style:{color:"#667",width:20}},`${i+1}`),
+            e('span',{style:{flex:1,color:r.pts1>0?GREEN:r.pts1<0?RED:"#667"}},
+              r.pts1===0 ? "Empate" :
+              r.pts1>0 ? `+${r.pts1} ${players[p[0][0]].name.split(" ")[0]}&${players[p[0][1]].name.split(" ")[0]}` :
+              `+${Math.abs(r.pts1)} ${players[p[1][0]].name.split(" ")[0]}&${players[p[1][1]].name.split(" ")[0]}`
+            ),
+            h.gordita!==null && e('span',{style:{color:GOLD}},"🏌️"),
+            h.sandy.some(Boolean) && e('span',{style:{color:"#4bc87a"}},"🏖️"),
+            h.porfuerazo.some(Boolean) && e('span',{style:{color:PURPLE}},"💥"),
+            h.multiplier>1 && e('span',{style:{color:PURPLE}},`${h.multiplier}x`)
+          );
+        })
+      ),
+
+      e('button',{onClick:()=>{setScreen("setup");setCurrentHoyo(0);setShowMultiplier(false);setHoyos(Array.from({length:18},(_,i)=>({num:i+1,scores:[null,null,null,null],gordita:null,sandy:[false,false,false,false],porfuerazo:[false,false,false,false],multiplier:1})));},
+        style:{width:"100%",padding:16,background:CARD,border:`2px dashed ${GOLD}`,borderRadius:12,
+        color:GOLD,fontSize:14,letterSpacing:2,cursor:"pointer",fontFamily:"inherit"}},
+        "🔄 Nueva Ronda")
+    );
+  }
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+</script>
+</body>
+</html>
