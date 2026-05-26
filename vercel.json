@@ -1,18 +1,8 @@
 {
   "buildCommand": null,
-  "outputDirectory": ".",
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Content-Security-Policy",
-          "value": "default-src * 'unsafe-inline' 'unsafe-eval' data: blob: https://unpkg.com https://*.supabase.co"
-        }
-      ]
-    }
-  ]
+  "outputDirectory": "."
 }
+
 
 
 
