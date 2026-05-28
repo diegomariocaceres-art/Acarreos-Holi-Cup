@@ -221,14 +221,15 @@ function App(){
    return {pair1:pairs[0],pair2:pairs[1],total:total,lastPts:lastPts,multiplier:mult,dolares:dolares,winner:total>0?pairs[0]:total<0?pairs[1]:null};
  }
 
+ // FIX: removed /2 — each player gets/pays the full tercio value
  function calcBalance(){
    var bal=[0,0,0,0];
    for(var t=0;t<3;t++){
      var r=calcTercio(t);
      if(r.winner){
        var loser=r.winner===r.pair1?r.pair2:r.pair1;
-       r.winner.forEach(function(i){bal[i]+=r.dolares/2;});
-       loser.forEach(function(i){bal[i]-=r.dolares/2;});
+       r.winner.forEach(function(i){bal[i]+=r.dolares;});
+       loser.forEach(function(i){bal[i]-=r.dolares;});
      }
    }
    return bal;
@@ -569,21 +570,40 @@ function App(){
      e('div',{style:{marginBottom:18}},
        e('div',{style:{fontSize:11,color:GOLD,letterSpacing:2,marginBottom:8}},"TERCIOS"),
        tercios.map(function(t,i){
+         var tColor=[GREEN,GOLD,PURPLE][i];
          return e('div',{key:i,style:{marginBottom:10,padding:"12px",borderRadius:12,background:CARD,border:"1px solid "+BORDER}},
-           e('div',{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}},
+           e('div',{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}},
              e('div',null,
-               e('div',{style:{fontSize:13,color:GOLD,fontWeight:"bold"}},"T"+(i+1)+" · H"+(i*6+1)+"-"+(i*6+6)),
+               e('div',{style:{fontSize:13,color:tColor,fontWeight:"bold"}},"T"+(i+1)+" · H"+(i*6+1)+"-"+(i*6+6)),
                e('div',{style:{fontSize:10,color:"#667"}},tlabels[i])
              ),
              t.multiplier>1?e('div',{style:{padding:"2px 8px",borderRadius:6,background:"rgba(168,127,232,0.2)",border:"1px solid "+PURPLE,color:PURPLE,fontSize:11}},"H"+(i*6+6)+" × "+t.multiplier+"x"):null
            ),
-           e('div',{style:{fontSize:11,color:"#aaa",marginBottom:4}},players[t.pair1[0]].name+" & "+players[t.pair1[1]].name+" vs "+players[t.pair2[0]].name+" & "+players[t.pair2[1]].name),
-           e('div',{style:{fontSize:11,color:"#667",marginBottom:4}},"H"+(i*6+1)+"-"+(i*6+5)+": "+(t.total-(t.lastPts*t.multiplier)>0?"+":"")+(t.total-(t.lastPts*t.multiplier))+" pts · H"+(i*6+6)+": "+(t.lastPts>0?"+":"")+t.lastPts+" × "+t.multiplier+" = "+(t.lastPts*t.multiplier>0?"+":"")+t.lastPts*t.multiplier),
-           e('div',{style:{display:"flex",justifyContent:"space-between",fontSize:12}},
-             e('span',{style:{color:"#667"}},"Total: "+(t.total>0?"+":"")+t.total+" pts · $"+Math.abs(t.total)+"×$"+pointValue+"+$"+baseValue),
-             e('span',{style:{color:GOLD,fontWeight:"bold"}},"$"+t.dolares)
+           e('div',{style:{fontSize:11,color:"#aaa",marginBottom:8}},
+             players[t.pair1[0]].name+" & "+players[t.pair1[1]].name,
+             e('span',{style:{color:"#555"}}," vs "),
+             players[t.pair2[0]].name+" & "+players[t.pair2[1]].name
            ),
-           t.winner?e('div',{style:{marginTop:6,padding:"5px 10px",borderRadius:8,background:"rgba(75,200,120,0.08)",border:"1px solid "+GREEN,fontSize:11,color:GREEN}},"🏆 "+players[t.winner[0]].name+" & "+players[t.winner[1]].name+" · +$"+t.dolares/2+" c/u"):null
+           e('div',{style:{fontSize:11,color:"#667",marginBottom:6}},
+             "H"+(i*6+1)+"-"+(i*6+5)+": "+(t.total-(t.lastPts*t.multiplier)>0?"+":"")+(t.total-(t.lastPts*t.multiplier))+" pts",
+             " · H"+(i*6+6)+": "+(t.lastPts>0?"+":"")+t.lastPts+" × "+t.multiplier+" = "+(t.lastPts*t.multiplier>0?"+":"")+t.lastPts*t.multiplier
+           ),
+           e('div',{style:{display:"flex",justifyContent:"space-between",alignItems:"center",fontSize:12,marginBottom:8}},
+             e('span',{style:{color:"#667"}},"Total: "+(t.total>0?"+":"")+t.total+" pts · |"+t.total+"|×$"+pointValue+"+$"+baseValue),
+             e('span',{style:{color:GOLD,fontWeight:"bold",fontSize:15}},"Pot: $"+t.dolares)
+           ),
+           t.winner
+             ? e('div',null,
+                 e('div',{style:{padding:"6px 10px",borderRadius:8,background:"rgba(75,200,120,0.08)",border:"1px solid "+GREEN,fontSize:11,color:GREEN,marginBottom:4}},
+                   "🏆 Ganan: "+players[t.winner[0]].name+" & "+players[t.winner[1]].name+" · +$"+t.dolares+" c/u"
+                 ),
+                 e('div',{style:{padding:"6px 10px",borderRadius:8,background:"rgba(232,127,127,0.06)",border:"1px solid rgba(232,127,127,0.3)",fontSize:11,color:RED}},
+                   "💸 Pagan: "+
+                   (function(){var loser=t.winner===t.pair1?t.pair2:t.pair1;return players[loser[0]].name+" & "+players[loser[1]].name;})()
+                   +" · −$"+t.dolares+" c/u"
+                 )
+               )
+             : e('div',{style:{padding:"6px 10px",borderRadius:8,background:CARD,border:"1px solid "+BORDER,fontSize:11,color:"#667"}},"Empate — nadie paga")
          );
        })
      ),
