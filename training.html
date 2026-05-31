@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diegolfa — Training</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f0a;
+    --surface: #111711;
+    --card: #161e16;
+    --border: #1e2b1e;
+    --green: #4ade80;
+    --green-dim: #2d6e47;
+    --green-pale: #1a3d28;
+    --gold: #f0c040;
+    --text: #e8f0e8;
+    --muted: #6b8c6b;
+    --danger: #f87171;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+  .header {
+    background: linear-gradient(160deg, #0d1a0d 0%, #0a0f0a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 20px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 3px;
+    color: var(--green);
+    line-height: 1;
+  }
+  .logo span { color: var(--muted); font-size: 13px; display: block; letter-spacing: 2px; margin-top: 2px; }
+  .hcp-widget {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .hcp-widget:hover { border-color: var(--green-dim); }
+  .hcp-block { text-align: center; }
+  .hcp-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .hcp-val { font-family: 'Bebas Neue', sans-serif; font-size: 32px; line-height: 1; }
+  .hcp-val.current { color: var(--green); }
+  .hcp-val.goal { color: var(--gold); }
+  .hcp-arrow { color: var(--muted); font-size: 18px; }
+  .hcp-edit-btn {
+    background: var(--green-pale);
+    border: 1px solid var(--green-dim);
+    color: var(--green);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .hcp-edit-btn:hover { background: var(--green-dim); }
+  .progress-wrap {
+    margin-top: 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+  }
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .progress-bar-bg {
+    background: var(--border);
+    border-radius: 99px;
+    height: 8px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--green-dim), var(--green));
+    transition: width 0.8s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .tabs {
+    display: flex;
+    gap: 4px;
+    padding: 12px 20px 0;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .tab {
+    padding: 10px 18px;
+    border-radius: 10px 10px 0 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    border-bottom: none;
+    transition: all 0.2s;
+  }
+  .tab.active {
+    background: var(--card);
+    color: var(--green);
+    border-color: var(--border);
+  }
+  .content { padding: 20px; }
+  .section { display: none; }
+  .section.active { display: block; }
+  .week-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .week-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .week-btn:hover { border-color: var(--green-dim); color: var(--green); }
+  .week-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 2px;
+    color: var(--text);
+  }
+  .day-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .day-card.completed { border-color: var(--green-dim); }
+  .day-header {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+  }
+  .day-badge {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: var(--green);
+    letter-spacing: 1px;
+    min-width: 56px;
+  }
+  .day-title { flex: 1; }
+  .day-title strong { font-size: 14px; font-weight: 600; display: block; }
+  .day-title span { font-size: 12px; color: var(--muted); }
+  .day-check {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .day-check.done {
+    background: var(--green);
+    border-color: var(--green);
+    color: #0a0f0a;
+  }
+  .day-body {
+    padding: 0 16px 16px;
+    display: none;
+  }
+  .day-body.open { display: block; }
+  .drill-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-top: 1px solid var(--border);
+  }
+  .drill-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green-dim);
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+  .drill-text { font-size: 13px; line-height: 1.5; }
+  .drill-time {
+    font-size: 11px;
+    color: var(--gold);
+    font-weight: 600;
+    margin-left: auto;
+    white-space: nowrap;
+    padding-left: 8px;
+  }
+  .notes-wrap { margin-top: 12px; }
+  .notes-label { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .notes-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    padding: 10px 12px;
+    resize: none;
+    height: 72px;
+    transition: border-color 0.2s;
+  }
+  .notes-input:focus { outline: none; border-color: var(--green-dim); }
+  .notes-input::placeholder { color: var(--muted); }
+  .score-wrap {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 10px;
+  }
+  .score-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--green);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    padding: 8px 12px;
+    width: 90px;
+    text-align: center;
+  }
+  .score-input:focus { outline: none; border-color: var(--green-dim); }
+  .score-label { font-size: 12px; color: var(--muted); }
+  .save-btn {
+    background: var(--green-pale);
+    border: 1px solid var(--green-dim);
+    color: var(--green);
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 12px;
+    transition: all 0.2s;
+  }
+  .save-btn:hover { background: var(--green-dim); }
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .chart-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .chart-sub { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+  canvas { width: 100% !important; }
+  .hcp-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+  }
+  .hcp-table th {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: left;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .hcp-table td {
+    font-size: 13px;
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .hcp-table tr:last-child td { border-bottom: none; }
+  .hcp-down { color: var(--green); }
+  .hcp-up { color: var(--danger); }
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .stat-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    line-height: 1;
+    color: var(--green);
+  }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    width: 100%;
+    max-width: 320px;
+  }
+  .modal h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+    color: var(--green);
+  }
+  .modal-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    padding: 10px 16px;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .modal-input:focus { outline: none; border-color: var(--green-dim); }
+  .modal-btns { display: flex; gap: 8px; }
+  .modal-cancel {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 10px;
+    padding: 12px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+  }
+  .modal-save {
+    flex: 1;
+    background: var(--green-pale);
+    border: 1px solid var(--green-dim);
+    color: var(--green);
+    border-radius: 10px;
+    padding: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .modal-save:hover { background: var(--green-dim); }
+  .week-complete-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--green-pale);
+    border: 1px solid var(--green-dim);
+    color: var(--green);
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+    margin-bottom: 14px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="logo">DIEGOLFA<span>TRAINING PROGRAM</span></div>
+    </div>
+    <div class="hcp-widget" onclick="openModal()">
+      <div class="hcp-block">
+        <div class="hcp-label">Index</div>
+        <div class="hcp-val current" id="hcpDisplay">12.9</div>
+      </div>
+      <div class="hcp-arrow">→</div>
+      <div class="hcp-block">
+        <div class="hcp-label">Meta Dic</div>
+        <div class="hcp-val goal">10.0</div>
+      </div>
+    </div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-meta">
+      <span>Progreso hacia meta</span>
+      <span id="progressPct">—</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('programa')">Programa</div>
+  <div class="tab" onclick="showTab('progreso')">Progreso</div>
+  <div class="tab" onclick="showTab('handicap')">Handicap</div>
+</div>
+
+<div class="content">
+<div class="section active" id="tab-programa">
+  <div class="week-nav">
+    <button class="week-btn" onclick="changeWeek(-1)">‹</button>
+    <div class="week-label" id="weekLabel">SEMANA 1</div>
+    <button class="week-btn" onclick="changeWeek(1)">›</button>
+  </div>
+
+  <!-- DIA 1 -->
+  <div class="day-card" id="card-1">
+    <div class="day-header" onclick="toggleDay(1)">
+      <div class="day-badge">DÍA 1</div>
+      <div class="day-title">
+        <strong>Range — Wedge & Juego Corto</strong>
+        <span>~60 min</span>
+      </div>
+      <div class="day-check" id="check-1" onclick="toggleCheck(event,1)"></div>
+    </div>
+    <div class="day-body" id="body-1">
+      <div class="drill-item"><div class="drill-dot"></div><div class="drill-text">Estiramientos: torso rotations, hip flexors, shoulder cross, wrist circles, cat-cow</div><div class="drill-time">10 min</div></div>
+      <div class="drill-item"><div class="drill-dot"></div><div class="drill-text">Zona 50-100 yardas con 52°, 56° y 60° — 3 distancias fijas, cuenta las que caen en 10 yardas</div><div class="drill-time">20 min</div></div>
+      <div class="drill-item"><div class="drill-dot"></div><div class="drill-text">Chips y pitches alrededor del green — lies variados (fairway, rough, borde)</div><div class="drill-time">15 min</div></div>
+      <div class="drill-item"><div class="drill-dot"></div><div class="drill-text">Putting: putts 3-6 pies + velocidad en largos (20-30 pies)</div><div class="drill-time">15 min</div></div>
+      <div class="notes-wrap">
+        <div class="notes-label">Notas de la sesión</div>
+        <textarea class="notes-input" id="notes-1" placeholder="¿Qué funcionó? ¿Qué mejorar?"></textarea>
+      </div>
+      <button class="save-btn" onclick="saveDay(1)">Guardar sesión</button>
+    </div>
+  </div>
+
+  <!-- DIA 2 -->
+  <div class="day-card" id="card-2">
+    <div class="day-header" onclick="toggleDay(2)">
+      <div class="day-badge">DÍA 2</div>
+      <div class="day-title">
+        <strong>Gimnasio — Fuerza & Rotación</strong>
+        <span>~50 min</span>
+      </div>
+      <div class="day-check" id="check-2" onclick="toggleCheck(event,2)"></div>
+    </div>
+    <div class="day-body" id="body-2">
+      <div class="drill-item"><div class="drill-dot"></div><div class="drill-text">Calentamiento: hip circles, torso rotations, band pull-aparts</div><div class="drill-time">10 min</div></div>
+      <div class="drill-item"><div class="drill-dot"></div><div class="drill-text">Goblet squat 4×10 — base y estabilidad</div><div class="drill-time">—</div></div>
+      <div class="drill-item"><div class="drill-dot"></div><div class="drill-text">Romanian deadlift 4×10 — cadena posterior</div><div class="drill-time">—</div></div>
+      <div class="drill-item"><div class="drill-dot"></div><div class="drill-text">Cable rotation / Pallof press 3×12 — potencia rotacional</div><div class="drill-time">—</div></div>
+      <div class="drill-item"><div class="drill-dot"></div><div class="drill-text">Lat pulldown + remo 3×12 — ancho de swing</div><div class="drill-time">—</div></div>
+      <div class="drill-item"><div class="drill-dot"></div><div class="drill-text">Core: plank + dead bug + med ball rotational slam</div><div class="drill-time">—</div></div>
+      <div class="notes-wrap">
+        <div class="notes-label">Notas de la sesión</div>
+        <textarea class="notes-input" id="notes-2" placeholder="Pesos, sets completados, sensaciones..."></textarea>
+      </div>
+      <button class="save-btn" onclick="saveDay(2)">Guardar sesión</button>
+    </div>
+  </div>
+
+  <!-- DIA 3 -->
+  <div class="day-card" id="card-3">
+    <div class="day-header" onclick="toggleDay(3)">
+      <div class="day-badge">DÍA 3</div>
+      <div class="day-title">
+        <strong>Ronda Oficial 18 Hoyos</strong>
+        <span>Viernes — GHIN</span>
+      </div>
+      <div class="day-check" id="check-3" onclick="toggleCheck(event,3)"></div>
+    </div>
+    <div class="day-body" id="body-3">
+      <div class="drill-item"><div class="drill-dot"></div><div class="drill-text">Jugar con marcador oficial para el GHIN</div><div class="drill-time">—</div></div>
+      <div class="drill-item"><div class="drill-dot"></div><div class="drill-text">Post-ronda: anotar 3-putts, hoyos perdidos 50-100 yardas y dobles o peores</div><div class="drill-time">—</div></div>
+      <div class="score-wrap">
+        <input class="score-input" type="number" id="score-3" placeholder="87" min="60" max="130">
+        <div class="score-label">Score<br>de la ronda</div>
+      </div>
+      <div class="score-wrap" style="margin-top:8px">
+        <input class="score-input" type="number" id="putts-3" placeholder="32" min="18" max="60" style="color:var(--gold)">
+        <div class="score-label">Total<br>putts</div>
+        <input class="score-input" type="number" id="doubles-3" placeholder="2" min="0" max="18" style="color:var(--danger); margin-left:8px">
+        <div class="score-label">Dobles<br>o peores</div>
+      </div>
+      <div class="notes-wrap">
+        <div class="notes-label">Notas de la ronda</div>
+        <textarea class="notes-input" id="notes-3" placeholder="Cancha, condiciones, qué mejorar..."></textarea>
+      </div>
+      <button class="save-btn" onclick="saveDay(3)">Guardar ronda</button>
+    </div>
+  </div>
+
+  <!-- DIA 4 -->
+  <div class="day-card" id="card-4">
+    <div class="day-header" onclick="toggleDay(4)">
+      <div class="day-badge">DÍA 4</div>
+      <div class="day-title">
+        <strong>Range — Full Bag + Driver</strong>
+        <span>~60 min</span>
+      </div>
+      <div class="day-check" id="check-4" onclick="toggleCheck(event,4)"></div>
+    </div>
+    <div class="day-body" id="body-4">
+      <div class="drill-item"><div class="drill-dot"></div><div class="drill-text">Full bag de abajo para arriba: 60°→56°→52°→PW→9i→8i→7i→6i→5i→4H→3H→driver</div><div class="drill-time">—</div></div>
+      <div class="drill-item"><div class="drill-dot"></div><div class="drill-text">3-4 bolas por palo, enfocado en contacto limpio y distancia correcta</div><div class="drill-time">30 min</div></div>
+      <div class="drill-item"><div class="drill-dot"></div><div class="drill-text">Driver únicamente — fairway antes que distancia</div><div class="drill-time">15 min</div></div>
+      <div class="drill-item"><div class="drill-dot"></div><div class="drill-text">Putting opcional si hay green disponible</div><div class="drill-time">15 min</div></div>
+      <div class="notes-wrap">
+        <div class="notes-label">Notas de la sesión</div>
+        <textarea class="notes-input" id="notes-4" placeholder="¿Qué palo sintió mejor? ¿Cuál trabajar más?"></textarea>
+      </div>
+      <button class="save-btn" onclick="saveDay(4)">Guardar sesión</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROGRESO TAB -->
+<div class="section" id="tab-progreso">
+  <div class="summary-grid" id="summaryGrid">
+    <div class="stat-box">
+      <div class="stat-num" id="statSessions">0</div>
+      <div class="stat-label">Sesiones completadas esta semana</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" id="statStreak" style="color:var(--gold)">0</div>
+      <div class="stat-label">Semanas consecutivas activo</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" id="statRounds" style="color:var(--gold)">0</div>
+      <div class="stat-label">Rondas oficiales totales</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" id="statBestScore" style="color:var(--green)">—</div>
+      <div class="stat-label">Mejor score registrado</div>
+    </div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">SCORES POR RONDA</div>
+    <div class="chart-sub">Historial de scores en rondas oficiales</div>
+    <canvas id="scoreChart" height="180"></canvas>
+    <div id="noScores" style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0;">Registra tu primera ronda en el Día 3</div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">SESIONES POR SEMANA</div>
+    <div class="chart-sub">Consistencia de entrenamiento</div>
+    <canvas id="sessionChart" height="160"></canvas>
+  </div>
+</div>
+
+<!-- HANDICAP TAB -->
+<div class="section" id="tab-handicap">
+  <div class="chart-card">
+    <div class="chart-title">PROGRESO HANDICAP</div>
+    <div class="chart-sub">Meta: bajar de 12.9 → 10.0 antes de diciembre 2026</div>
+    <canvas id="hcpChart" height="220"></canvas>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">HISTORIAL</div>
+    <table class="hcp-table">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Index</th>
+          <th>Cambio</th>
+        </tr>
+      </thead>
+      <tbody id="hcpHistory">
+        <tr><td colspan="3" style="text-align:center;color:var(--muted);padding:16px;">Actualiza tu index para ver historial</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>Actualizar Index</h3>
+    <input class="modal-input" type="number" id="modalInput" placeholder="12.9" step="0.1" min="0" max="54">
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="modal-save" onclick="saveHcp()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+let state = JSON.parse(localStorage.getItem('diegolfa_training') || 'null') || {
+  currentHcp: 12.9,
+  hcpHistory: [{ date: '2026-05-31', value: 12.9 }],
+  weeks: {},
+  currentWeek: 1
+};
+
+const GOAL_HCP = 10.0;
+const START_HCP = 12.9;
+let currentWeek = state.currentWeek || 1;
+
+function init() {
+  updateHcpDisplay();
+  renderWeek();
+  updateProgress();
+}
+
+function save() {
+  state.currentWeek = currentWeek;
+  localStorage.setItem('diegolfa_training', JSON.stringify(state));
+}
+
+function showTab(tab) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+  if (tab === 'progreso') renderProgreso();
+  if (tab === 'handicap') renderHcpChart();
+}
+
+function changeWeek(dir) {
+  currentWeek = Math.max(1, currentWeek + dir);
+  document.getElementById('weekLabel').textContent = 'SEMANA ' + currentWeek;
+  renderWeek();
+}
+
+function getWeekData() {
+  if (!state.weeks[currentWeek]) state.weeks[currentWeek] = {};
+  return state.weeks[currentWeek];
+}
+
+function renderWeek() {
+  document.getElementById('weekLabel').textContent = 'SEMANA ' + currentWeek;
+  const w = getWeekData();
+  for (let d = 1; d <= 4; d++) {
+    const dd = w['day' + d] || {};
+    const check = document.getElementById('check-' + d);
+    const card = document.getElementById('card-' + d);
+    const notes = document.getElementById('notes-' + d);
+    if (dd.done) {
+      check.classList.add('done');
+      check.textContent = '✓';
+      card.classList.add('completed');
+    } else {
+      check.classList.remove('done');
+      check.textContent = '';
+      card.classList.remove('completed');
+    }
+    if (notes) notes.value = dd.notes || '';
+    if (d === 3) {
+      const scoreEl = document.getElementById('score-3');
+      const puttsEl = document.getElementById('putts-3');
+      const doublesEl = document.getElementById('doubles-3');
+      if (scoreEl) scoreEl.value = dd.score || '';
+      if (puttsEl) puttsEl.value = dd.putts || '';
+      if (doublesEl) doublesEl.value = dd.doubles || '';
+    }
+  }
+}
+
+function toggleDay(d) {
+  const body = document.getElementById('body-' + d);
+  body.classList.toggle('open');
+}
+
+function toggleCheck(e, d) {
+  e.stopPropagation();
+  const w = getWeekData();
+  if (!w['day' + d]) w['day' + d] = {};
+  w['day' + d].done = !w['day' + d].done;
+  renderWeek();
+  save();
+}
+
+function saveDay(d) {
+  const w = getWeekData();
+  if (!w['day' + d]) w['day' + d] = {};
+  const notes = document.getElementById('notes-' + d);
+  w['day' + d].notes = notes ? notes.value : '';
+  if (d === 3) {
+    const s = document.getElementById('score-3');
+    const p = document.getElementById('putts-3');
+    const db = document.getElementById('doubles-3');
+    w['day' + d].score = s ? parseInt(s.value) || null : null;
+    w['day' + d].putts = p ? parseInt(p.value) || null : null;
+    w['day' + d].doubles = db ? parseInt(db.value) || null : null;
+  }
+  w['day' + d].done = true;
+  save();
+  renderWeek();
+  const btn = event.target;
+  const orig = btn.textContent;
+  btn.textContent = '✓ Guardado';
+  btn.style.background = 'var(--green-dim)';
+  setTimeout(() => { btn.textContent = orig; btn.style.background = ''; }, 1500);
+}
+
+function updateHcpDisplay() {
+  document.getElementById('hcpDisplay').textContent = state.currentHcp.toFixed(1);
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = START_HCP - GOAL_HCP;
+  const done = Math.max(0, START_HCP - state.currentHcp);
+  const pct = Math.min(100, Math.round((done / total) * 100));
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '% completado';
+}
+
+function openModal() {
+  document.getElementById('modalInput').value = state.currentHcp.toFixed(1);
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+}
+
+function saveHcp() {
+  const val = parseFloat(document.getElementById('modalInput').value);
+  if (isNaN(val) || val < 0 || val > 54) return;
+  const today = new Date().toISOString().split('T')[0];
+  if (state.hcpHistory.length && state.hcpHistory[state.hcpHistory.length-1].date === today) {
+    state.hcpHistory[state.hcpHistory.length-1].value = val;
+  } else {
+    state.hcpHistory.push({ date: today, value: val });
+  }
+  state.currentHcp = val;
+  closeModal();
+  updateHcpDisplay();
+  save();
+  renderHcpHistory();
+}
+
+function renderProgreso() {
+  const w = getWeekData();
+  let sess = 0;
+  for (let d = 1; d <= 4; d++) { if (w['day'+d] && w['day'+d].done) sess++; }
+  document.getElementById('statSessions').textContent = sess;
+
+  let streak = 0;
+  for (let wk = currentWeek; wk >= 1; wk--) {
+    const wd = state.weeks[wk] || {};
+    const any = [1,2,3,4].some(d => wd['day'+d] && wd['day'+d].done);
+    if (any) streak++; else break;
+  }
+  document.getElementById('statStreak').textContent = streak;
+
+  let rounds = 0, best = null;
+  const scoreData = [], scoreLabels = [];
+  Object.keys(state.weeks).sort((a,b)=>a-b).forEach(wk => {
+    const d3 = state.weeks[wk]['day3'];
+    if (d3 && d3.score) {
+      rounds++;
+      if (best === null || d3.score < best) best = d3.score;
+      scoreData.push(d3.score);
+      scoreLabels.push('S' + wk);
+    }
+  });
+  document.getElementById('statRounds').textContent = rounds;
+  document.getElementById('statBestScore').textContent = best || '—';
+
+  const noScores = document.getElementById('noScores');
+  const scoreCanvas = document.getElementById('scoreChart');
+  if (scoreData.length > 0) {
+    noScores.style.display = 'none';
+    scoreCanvas.style.display = 'block';
+    renderLineChart('scoreChart', scoreLabels, scoreData, '#4ade80', 'Score');
+  } else {
+    noScores.style.display = 'block';
+    scoreCanvas.style.display = 'none';
+  }
+
+  const sessLabels = [], sessData = [];
+  const maxWk = Math.max(currentWeek, ...Object.keys(state.weeks).map(Number), 1);
+  for (let wk = 1; wk <= maxWk; wk++) {
+    sessLabels.push('S' + wk);
+    const wd = state.weeks[wk] || {};
+    sessData.push([1,2,3,4].filter(d => wd['day'+d] && wd['day'+d].done).length);
+  }
+  renderBarChart('sessionChart', sessLabels, sessData);
+}
+
+function renderHcpChart() {
+  renderHcpHistory();
+  const labels = state.hcpHistory.map(h => {
+    const d = new Date(h.date + 'T12:00:00');
+    return d.toLocaleDateString('es', { month: 'short', day: 'numeric' });
+  });
+  const vals = state.hcpHistory.map(h => h.value);
+  const goalLabel = 'Dic 2026';
+  const allLabels = [...labels, goalLabel];
+  const allVals = [...vals, null];
+
+  destroyChart('hcpChart');
+  const ctx = document.getElementById('hcpChart').getContext('2d');
+  chartInstances['hcpChart'] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: allLabels,
+      datasets: [
+        {
+          label: 'Handicap Index',
+          data: allVals,
+          borderColor: '#4ade80',
+          backgroundColor: 'rgba(74,222,128,0.08)',
+          borderWidth: 2.5,
+          pointBackgroundColor: '#4ade80',
+          pointRadius: 5,
+          tension: 0.3,
+          fill: true,
+          spanGaps: false
+        },
+        {
+          label: 'Meta (10.0)',
+          data: [START_HCP, ...new Array(allLabels.length - 2).fill(null), GOAL_HCP],
+          borderColor: '#f0c040',
+          borderWidth: 1.5,
+          borderDash: [5, 4],
+          pointRadius: [0, ...new Array(allLabels.length - 2).fill(0), 6],
+          pointBackgroundColor: '#f0c040',
+          tension: 0,
+          fill: false,
+          spanGaps: true
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { labels: { color: '#6b8c6b', font: { size: 11 } } },
+        tooltip: { callbacks: { label: ctx => ' Index: ' + ctx.parsed.y } }
+      },
+      scales: {
+        x: { ticks: { color: '#6b8c6b', font: { size: 11 } }, grid: { color: '#1e2b1e' } },
+        y: {
+          reverse: true,
+          ticks: { color: '#6b8c6b', font: { size: 11 } },
+          grid: { color: '#1e2b1e' },
+          min: Math.max(0, GOAL_HCP - 1),
+          max: Math.max(START_HCP + 0.5, state.currentHcp + 0.5)
+        }
+      }
+    }
+  });
+}
+
+function renderHcpHistory() {
+  const tbody = document.getElementById('hcpHistory');
+  if (state.hcpHistory.length <= 1) {
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:16px;">Actualiza tu index para ver historial</td></tr>';
+    return;
+  }
+  tbody.innerHTML = state.hcpHistory.slice().reverse().map((h, i, arr) => {
+    const prev = arr[i + 1];
+    let changeHtml = '<span style="color:var(--muted)">—</span>';
+    if (prev) {
+      const diff = h.value - prev.value;
+      if (diff < 0) changeHtml = `<span class="hcp-down">▼ ${Math.abs(diff).toFixed(1)}</span>`;
+      else if (diff > 0) changeHtml = `<span class="hcp-up">▲ ${diff.toFixed(1)}</span>`;
+      else changeHtml = `<span style="color:var(--muted)">—</span>`;
+    }
+    const d = new Date(h.date + 'T12:00:00');
+    const label = d.toLocaleDateString('es', { month: 'short', day: 'numeric', year: 'numeric' });
+    return `<tr><td>${label}</td><td style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--green)">${h.value.toFixed(1)}</td><td>${changeHtml}</td></tr>`;
+  }).join('');
+}
+
+const chartInstances = {};
+function destroyChart(id) {
+  if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
+}
+
+function renderLineChart(id, labels, data, color, label) {
+  destroyChart(id);
+  const ctx = document.getElementById(id).getContext('2d');
+  chartInstances[id] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label,
+        data,
+        borderColor: color,
+        backgroundColor: color + '18',
+        borderWidth: 2,
+        pointBackgroundColor: color,
+        pointRadius: 4,
+        tension: 0.3,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#6b8c6b', font: { size: 11 } }, grid: { color: '#1e2b1e' } },
+        y: { ticks: { color: '#6b8c6b', font: { size: 11 } }, grid: { color: '#1e2b1e' } }
+      }
+    }
+  });
+}
+
+function renderBarChart(id, labels, data) {
+  destroyChart(id);
+  const ctx = document.getElementById(id).getContext('2d');
+  chartInstances[id] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: data.map(v => v === 4 ? '#4ade80' : v >= 2 ? '#2d6e47' : '#1e2b1e'),
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#6b8c6b', font: { size: 11 } }, grid: { color: '#1e2b1e' } },
+        y: { min: 0, max: 4, ticks: { color: '#6b8c6b', font: { size: 11 }, stepSize: 1 }, grid: { color: '#1e2b1e' } }
+      }
+    }
+  });
+}
+
+init();
+</script>
+</body>
+</html>
