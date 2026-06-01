@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Diegolfa — Training</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
   :root {
     --bg: #0a0f0a;
@@ -18,7 +19,6 @@
     --text: #e8f0e8;
     --muted: #6b8c6b;
     --danger: #f87171;
-    --blue: #60a5fa;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -33,7 +33,7 @@
   .header {
     background: linear-gradient(160deg, #0d1a0d 0%, #0a0f0a 100%);
     border-bottom: 1px solid var(--border);
-    padding: 24px 20px 20px;
+    padding: 20px 20px 16px;
     position: sticky;
     top: 0;
     z-index: 100;
@@ -42,243 +42,186 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
   }
   .logo {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
+    font-size: 26px;
     letter-spacing: 3px;
     color: var(--green);
     line-height: 1;
   }
-  .logo span { color: var(--muted); font-size: 13px; display: block; letter-spacing: 2px; margin-top: 2px; }
+  .logo span { color: var(--muted); font-size: 12px; display: block; letter-spacing: 2px; margin-top: 2px; }
 
-  /* HANDICAP WIDGET */
+  /* HCP WIDGET */
   .hcp-widget {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 14px 16px;
+    border-radius: 12px;
+    padding: 10px 14px;
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 14px;
     cursor: pointer;
     transition: border-color 0.2s;
   }
   .hcp-widget:hover { border-color: var(--green-dim); }
   .hcp-block { text-align: center; }
   .hcp-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
-  .hcp-val { font-family: 'Bebas Neue', sans-serif; font-size: 32px; line-height: 1; }
-  .hcp-val.current { color: var(--gold); }
-  .hcp-val.goal { color: var(--green); }
-  .hcp-divider { width: 1px; height: 40px; background: var(--border); }
-  .hcp-progress { flex: 1; }
-  .hcp-prog-label { font-size: 10px; color: var(--muted); margin-bottom: 6px; display: flex; justify-content: space-between; }
-  .hcp-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-  .hcp-fill { height: 100%; background: linear-gradient(90deg, var(--green-dim), var(--green)); border-radius: 3px; transition: width 0.5s; }
-  .hcp-edit-hint { font-size: 10px; color: var(--muted); text-align: right; margin-top: 4px; }
+  .hcp-val { font-family: 'Bebas Neue', sans-serif; font-size: 28px; line-height: 1; }
+  .hcp-val.green { color: var(--green); }
+  .hcp-val.gold { color: var(--gold); }
+  .hcp-arrow { color: var(--muted); font-size: 18px; }
+  .hcp-progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 6px;
+    overflow: hidden;
+    width: 120px;
+  }
+  .hcp-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green-dim), var(--green));
+    border-radius: 2px;
+    transition: width 0.4s;
+  }
 
   /* TABS */
   .tabs {
     display: flex;
-    padding: 0 20px;
     gap: 4px;
-    margin-top: 16px;
+    padding: 0 4px;
   }
   .tab {
     flex: 1;
     padding: 8px 4px;
-    text-align: center;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 500;
     letter-spacing: 1px;
     text-transform: uppercase;
-    color: var(--muted);
-    border-bottom: 2px solid transparent;
     cursor: pointer;
+    border-bottom: 2px solid transparent;
     transition: all 0.2s;
   }
   .tab.active { color: var(--green); border-bottom-color: var(--green); }
 
   /* CONTENT */
-  .content { padding: 20px; }
+  .content { padding: 16px 16px 0; }
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
 
-  /* WEEK SELECTOR */
+  /* WEEK NAV */
   .week-nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
+  }
+  .week-nav button {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 12px 16px;
-  }
-  .week-btn {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    width: 32px; height: 32px;
+    color: var(--text);
+    width: 36px; height: 36px;
     border-radius: 8px;
-    cursor: pointer;
     font-size: 16px;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s;
+    cursor: pointer;
+    transition: border-color 0.2s;
   }
-  .week-btn:hover { border-color: var(--green-dim); color: var(--green); }
-  .week-label { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; color: var(--text); }
-  .week-sub { font-size: 11px; color: var(--muted); text-align: center; margin-top: 2px; }
+  .week-nav button:hover { border-color: var(--green-dim); }
+  .week-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: var(--green);
+  }
+  .week-dates { font-size: 11px; color: var(--muted); text-align: center; margin-top: 2px; }
 
   /* DAY CARDS */
   .day-card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 16px;
-    margin-bottom: 14px;
-    overflow: hidden;
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 10px;
     transition: border-color 0.2s;
   }
   .day-card.done { border-color: var(--green-dim); }
-  .day-card.optional-day { border-style: dashed; }
+  .day-card.optional { border-style: dashed; }
   .day-header {
     display: flex;
     align-items: center;
-    padding: 14px 16px;
-    gap: 12px;
-    cursor: pointer;
+    justify-content: space-between;
+    margin-bottom: 10px;
   }
-  .day-num {
+  .day-label {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
+    font-size: 16px;
+    letter-spacing: 2px;
     color: var(--muted);
-    line-height: 1;
-    min-width: 24px;
   }
-  .day-card.done .day-num { color: var(--green); }
-  .day-info { flex: 1; }
-  .day-title { font-weight: 600; font-size: 15px; }
-  .day-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .day-check {
-    width: 28px; height: 28px;
+  .day-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  .day-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .check-btn {
+    width: 32px; height: 32px;
     border-radius: 50%;
     border: 2px solid var(--border);
-    display: flex; align-items: center; justify-content: center;
+    background: none;
+    color: var(--muted);
+    font-size: 16px;
     cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
     transition: all 0.2s;
-    font-size: 14px;
     flex-shrink: 0;
   }
-  .day-check:hover { border-color: var(--green-dim); }
-  .day-card.done .day-check { background: var(--green); border-color: var(--green); color: #000; }
-  .optional-badge {
-    font-size: 10px;
-    color: var(--blue);
-    background: rgba(96,165,250,0.1);
-    border: 1px solid rgba(96,165,250,0.2);
-    border-radius: 6px;
-    padding: 2px 7px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-left: 4px;
+  .check-btn.done {
+    background: var(--green-pale);
+    border-color: var(--green);
+    color: var(--green);
   }
 
-  /* DAY BODY */
-  .day-body { padding: 0 16px 16px; }
-  .session-block { margin-bottom: 10px; }
-  .session-block:last-child { margin-bottom: 0; }
-  .session-title {
-    font-size: 11px;
+  /* EXERCISES */
+  .exercises { margin-top: 8px; }
+  .ex-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 6px 0;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
     color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 6px;
   }
-  .session-items { list-style: none; }
-  .session-items li {
-    font-size: 13px;
-    color: var(--text);
-    padding: 4px 0;
-    padding-left: 12px;
-    position: relative;
-    line-height: 1.4;
-  }
-  .session-items li::before {
-    content: '—';
-    position: absolute;
-    left: 0;
-    color: var(--green-dim);
-    font-size: 11px;
+  .ex-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--green-dim);
+    margin-top: 5px;
+    flex-shrink: 0;
   }
 
-  /* ROUND INPUTS */
-  .round-inputs {
+  /* ROUND FIELDS */
+  .round-fields {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px;
-    margin-top: 12px;
-  }
-  .round-field label {
-    display: block;
-    font-size: 10px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 5px;
-  }
-  .round-field input {
-    width: 100%;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    text-align: center;
-    padding: 8px 4px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .round-field input:focus { border-color: var(--green-dim); }
-  .round-field input::placeholder { color: var(--border); }
-  .round-notes-row {
+    gap: 8px;
     margin-top: 10px;
   }
-  .round-notes-row label {
+  .round-fields.four-col {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
+  .field-group label {
     display: block;
     font-size: 10px;
     color: var(--muted);
-    text-transform: uppercase;
     letter-spacing: 1px;
-    margin-bottom: 5px;
-  }
-  .round-notes-row input {
-    width: 100%;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-size: 13px;
-    padding: 9px 12px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .round-notes-row input:focus { border-color: var(--green-dim); }
-
-  /* NOTES */
-  .day-notes {
-    margin-top: 10px;
-  }
-  .day-notes label {
-    display: block;
-    font-size: 10px;
-    color: var(--muted);
     text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
   }
-  .day-notes textarea {
+  .field-group input, .field-group select {
     width: 100%;
     background: var(--surface);
     border: 1px solid var(--border);
@@ -286,235 +229,174 @@
     color: var(--text);
     font-family: 'DM Sans', sans-serif;
     font-size: 13px;
-    padding: 10px 12px;
-    resize: none;
-    height: 60px;
+    padding: 7px 10px;
     outline: none;
     transition: border-color 0.2s;
   }
-  .day-notes textarea:focus { border-color: var(--green-dim); }
+  .field-group input:focus, .field-group select:focus { border-color: var(--green-dim); }
+  .field-group select option { background: var(--card); }
 
-  /* SAVE BTN */
-  .save-btn {
-    width: 100%;
-    margin-top: 12px;
-    background: var(--green-pale);
-    border: 1px solid var(--green-dim);
-    color: var(--green);
-    border-radius: 10px;
-    padding: 10px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    letter-spacing: 1px;
-    transition: all 0.2s;
-  }
-  .save-btn:hover { background: var(--green-dim); color: #fff; }
-
-  /* ── PROGRESO TAB ── */
-  .section-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px;
-    letter-spacing: 2px;
-    color: var(--green);
-    margin-bottom: 14px;
-  }
-  .stats-grid {
+  /* STATS ROW */
+  .stats-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 8px;
+    margin-bottom: 16px;
   }
   .stat-card {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 14px 10px;
+    padding: 12px;
     text-align: center;
   }
   .stat-val {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
+    font-size: 26px;
+    color: var(--green);
     line-height: 1;
-    color: var(--gold);
   }
-  .stat-label { font-size: 10px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+  .stat-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 4px; }
 
-  /* CHART */
+  /* CHART CONTAINERS */
   .chart-card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 16px;
-    margin-bottom: 20px;
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 14px;
   }
   .chart-title {
-    font-size: 11px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    letter-spacing: 2px;
     color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
     margin-bottom: 12px;
   }
   canvas { width: 100% !important; }
 
-  /* HISTORY TABLE */
-  .history-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-  }
-  .history-table th {
-    text-align: left;
-    font-size: 10px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 8px 6px;
-    border-bottom: 1px solid var(--border);
-  }
-  .history-table td {
-    padding: 10px 6px;
-    border-bottom: 1px solid var(--border);
-  }
-  .history-table tr:last-child td { border-bottom: none; }
-  .score-chip {
-    background: var(--green-pale);
-    color: var(--green);
-    border-radius: 6px;
-    padding: 2px 8px;
-    font-weight: 600;
-    font-size: 13px;
-  }
-
   /* HCP TAB */
-  .hcp-update-form {
+  .hcp-form {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 14px;
-    padding: 16px;
-    margin-bottom: 20px;
-    display: flex;
-    gap: 10px;
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  .hcp-form-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .hcp-input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 8px;
     align-items: flex-end;
   }
-  .hcp-update-form .field { flex: 1; }
-  .hcp-update-form label {
-    display: block;
-    font-size: 10px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 6px;
-  }
-  .hcp-update-form input {
-    width: 100%;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-size: 16px;
-    padding: 10px 12px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .hcp-update-form input:focus { border-color: var(--green-dim); }
-  .hcp-add-btn {
+  .btn-save {
     background: var(--green-pale);
     border: 1px solid var(--green-dim);
     color: var(--green);
-    border-radius: 10px;
-    padding: 10px 16px;
     font-family: 'DM Sans', sans-serif;
     font-size: 13px;
     font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 8px;
     cursor: pointer;
+    transition: all 0.2s;
     white-space: nowrap;
-    transition: all 0.2s;
-    height: 42px;
   }
-  .hcp-add-btn:hover { background: var(--green-dim); color: #fff; }
+  .btn-save:hover { background: var(--green-dim); color: #fff; }
 
-  .hcp-history {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    overflow: hidden;
+  /* HCP HISTORY TABLE */
+  .hcp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
   }
-  .hcp-row {
-    display: flex;
-    align-items: center;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    gap: 12px;
-  }
-  .hcp-row:last-child { border-bottom: none; }
-  .hcp-row-date { font-size: 12px; color: var(--muted); flex: 1; }
-  .hcp-row-val { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--gold); }
-  .hcp-row-delta { font-size: 12px; font-weight: 600; }
-  .delta-down { color: var(--green); }
-  .delta-up { color: var(--danger); }
-  .hcp-row-del {
-    background: none;
-    border: 1px solid var(--border);
+  .hcp-table th {
+    text-align: left;
     color: var(--muted);
-    width: 26px; height: 26px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 13px;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border);
   }
-  .hcp-row-del:hover { border-color: var(--danger); color: var(--danger); }
+  .hcp-table td {
+    padding: 8px 8px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  .hcp-table tr:last-child td { border-bottom: none; }
+  .delta-pos { color: var(--danger); }
+  .delta-neg { color: var(--green); }
 
   /* MODAL */
   .modal-overlay {
     display: none;
-    position: fixed; inset: 0;
+    position: fixed;
+    inset: 0;
     background: rgba(0,0,0,0.7);
     z-index: 200;
-    align-items: center;
+    align-items: flex-end;
     justify-content: center;
-    padding: 20px;
   }
   .modal-overlay.open { display: flex; }
   .modal {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 24px;
-    width: 100%;
-    max-width: 340px;
-  }
-  .modal h3 { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 2px; color: var(--green); margin-bottom: 16px; }
-  .modal input {
-    width: 100%;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    color: var(--text);
+    border-radius: 20px 20px 0 0;
+    padding: 20px;
+    width: 100%;
+    max-width: 480px;
+  }
+  .modal-title {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 32px;
-    text-align: center;
-    padding: 12px;
-    outline: none;
-    margin-bottom: 16px;
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: var(--green);
+    margin-bottom: 14px;
   }
-  .modal-btns { display: flex; gap: 10px; }
-  .modal-btn {
-    flex: 1; padding: 12px;
-    border-radius: 10px;
+  .modal-actions { display: flex; gap: 8px; margin-top: 14px; }
+  .btn-cancel {
+    flex: 1;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
     font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 13px;
+    padding: 10px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.2s;
   }
-  .modal-btn.cancel { background: none; border: 1px solid var(--border); color: var(--muted); }
-  .modal-btn.confirm { background: var(--green-pale); border: 1px solid var(--green-dim); color: var(--green); }
-  .modal-btn.confirm:hover { background: var(--green-dim); color: #fff; }
 
-  .empty-state { text-align: center; padding: 30px 20px; color: var(--muted); font-size: 13px; }
+  .empty-state { text-align: center; color: var(--muted); font-size: 12px; padding: 20px; }
+
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 20px;
+    background: var(--green-pale);
+    color: var(--green);
+    letter-spacing: 1px;
+    margin-left: 6px;
+  }
+  .badge.opt { background: rgba(240,192,64,0.1); color: var(--gold); }
+
+  .score-chip {
+    display: inline-block;
+    background: var(--green-pale);
+    color: var(--green);
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+  }
 </style>
 </head>
 <body>
@@ -527,592 +409,480 @@
     <div class="hcp-widget" onclick="openHcpModal()">
       <div class="hcp-block">
         <div class="hcp-label">Actual</div>
-        <div class="hcp-val current" id="hcp-display">—</div>
+        <div class="hcp-val green" id="hdr-current">12.8</div>
       </div>
-      <div class="hcp-divider"></div>
+      <div class="hcp-arrow">→</div>
       <div class="hcp-block">
         <div class="hcp-label">Meta</div>
-        <div class="hcp-val goal">10.0</div>
-      </div>
-      <div class="hcp-divider"></div>
-      <div class="hcp-progress">
-        <div class="hcp-prog-label">
-          <span>Progreso</span>
-          <span id="hcp-pct">—</span>
-        </div>
-        <div class="hcp-bar"><div class="hcp-fill" id="hcp-fill" style="width:0%"></div></div>
-        <div class="hcp-edit-hint">toca para editar</div>
+        <div class="hcp-val gold">10.0</div>
       </div>
     </div>
   </div>
   <div class="tabs">
-    <div class="tab active" onclick="switchTab('programa')">Programa</div>
-    <div class="tab" onclick="switchTab('progreso')">Progreso</div>
-    <div class="tab" onclick="switchTab('handicap')">Handicap</div>
+    <button class="tab active" onclick="switchTab('programa')">Programa</button>
+    <button class="tab" onclick="switchTab('progreso')">Progreso</button>
+    <button class="tab" onclick="switchTab('handicap')">Handicap</button>
   </div>
 </div>
 
-<!-- ═══════════════ PROGRAMA TAB ═══════════════ -->
 <div class="content">
-<div class="tab-panel active" id="tab-programa">
 
-  <div class="week-nav">
-    <button class="week-btn" onclick="changeWeek(-1)">‹</button>
-    <div>
-      <div class="week-label" id="week-label">SEMANA 1</div>
-      <div class="week-sub" id="week-dates">—</div>
+  <!-- ═══════════ TAB: PROGRAMA ═══════════ -->
+  <div id="tab-programa" class="tab-panel active">
+    <div class="week-nav">
+      <button onclick="changeWeek(-1)">‹</button>
+      <div>
+        <div class="week-title" id="week-label">SEMANA 1</div>
+        <div class="week-dates" id="week-dates">—</div>
+      </div>
+      <button onclick="changeWeek(1)">›</button>
     </div>
-    <button class="week-btn" onclick="changeWeek(1)">›</button>
-  </div>
 
-  <!-- DÍA 1 -->
-  <div class="day-card" id="card-1">
-    <div class="day-header" onclick="toggleDay(1)">
-      <div class="day-num">1</div>
-      <div class="day-info">
-        <div class="day-title">Range — Wedge & Juego Corto</div>
-        <div class="day-meta">~60 min</div>
+    <!-- DÍA 1: RANGE WEDGE -->
+    <div class="day-card" id="card-1">
+      <div class="day-header">
+        <div>
+          <div class="day-label">DÍA 1 — MARTES</div>
+          <div class="day-title">Range · Wedge & Short Game <span class="badge">60 min</span></div>
+          <div class="day-meta">Enfoque: 50–100 yds · Chipping · Bunker</div>
+        </div>
+        <button class="check-btn" id="chk-1" onclick="toggleDay(1)">✓</button>
       </div>
-      <div class="day-check" onclick="toggleCheck(event,1)" id="check-1"></div>
+      <div class="exercises">
+        <div class="ex-item"><div class="ex-dot"></div><span>Stretching: rotaciones de torso, flexores de cadera, hombro cruzado, círculos de muñeca, cat-cow — 10 min</span></div>
+        <div class="ex-item"><div class="ex-dot"></div><span>Wedge 50–70 yds: 3 series de 10 bolas con cada wedge (52°/56°/60°)</span></div>
+        <div class="ex-item"><div class="ex-dot"></div><span>Wedge 80–100 yds: 3 series de 10 bolas, foco en contacto limpio</span></div>
+        <div class="ex-item"><div class="ex-dot"></div><span>Chipping alrededor del green: 20 min (chip & run, flop, pitch)</span></div>
+        <div class="ex-item"><div class="ex-dot"></div><span>Bunker: 10–15 bolas desde arena</span></div>
+      </div>
     </div>
-    <div class="day-body" id="body-1" style="display:none">
-      <div class="session-block">
-        <div class="session-title">Estiramientos (10 min)</div>
-        <ul class="session-items">
-          <li>Torso rotations</li>
-          <li>Hip flexors</li>
-          <li>Shoulder cross</li>
-          <li>Wrist circles</li>
-          <li>Cat-cow</li>
-        </ul>
-      </div>
-      <div class="session-block">
-        <div class="session-title">Zona 50-100 yardas (20 min)</div>
-        <ul class="session-items">
-          <li>52°, 56°, 60° — 3 distancias fijas</li>
-          <li>Enfocado en contacto limpio</li>
-        </ul>
-      </div>
-      <div class="session-block">
-        <div class="session-title">Chips & Pitches (15 min)</div>
-        <ul class="session-items">
-          <li>Alrededor del green, lies variados</li>
-        </ul>
-      </div>
-      <div class="session-block">
-        <div class="session-title">Putting (15 min)</div>
-        <ul class="session-items">
-          <li>Putts 3-6 pies</li>
-          <li>Velocidad en largos</li>
-        </ul>
-      </div>
-      <div class="day-notes">
-        <label>Notas de sesión</label>
-        <textarea id="notes-1" placeholder="¿Qué trabajaste? ¿Qué mejorar?" oninput="saveNotes(1)"></textarea>
-      </div>
-      <button class="save-btn" onclick="toggleCheck(event,1)">Marcar completado</button>
-    </div>
-  </div>
 
-  <!-- DÍA 2 -->
-  <div class="day-card" id="card-2">
-    <div class="day-header" onclick="toggleDay(2)">
-      <div class="day-num">2</div>
-      <div class="day-info">
-        <div class="day-title">Gimnasio — Fuerza & Rotación</div>
-        <div class="day-meta">~50 min</div>
+    <!-- DÍA 2: GYM -->
+    <div class="day-card" id="card-2">
+      <div class="day-header">
+        <div>
+          <div class="day-label">DÍA 2 — MIÉRCOLES</div>
+          <div class="day-title">Gym · Fuerza & Rotación <span class="badge">50 min</span></div>
+          <div class="day-meta">Core, cadera, rotación de tronco</div>
+        </div>
+        <button class="check-btn" id="chk-2" onclick="toggleDay(2)">✓</button>
       </div>
-      <div class="day-check" onclick="toggleCheck(event,2)" id="check-2"></div>
+      <div class="exercises">
+        <div class="ex-item"><div class="ex-dot"></div><span>Calentamiento dinámico: 5 min (jumping jacks, arm circles, leg swings)</span></div>
+        <div class="ex-item"><div class="ex-dot"></div><span>Sentadillas con rotación: 3×12</span></div>
+        <div class="ex-item"><div class="ex-dot"></div><span>Peso muerto rumano: 3×10</span></div>
+        <div class="ex-item"><div class="ex-dot"></div><span>Cable rotation / Pallof press: 3×15 cada lado</span></div>
+        <div class="ex-item"><div class="ex-dot"></div><span>Plancha lateral + rotación: 3×10 cada lado</span></div>
+        <div class="ex-item"><div class="ex-dot"></div><span>Hip hinge con banda: 3×15 · Glute bridge: 3×15</span></div>
+      </div>
     </div>
-    <div class="day-body" id="body-2" style="display:none">
-      <div class="session-block">
-        <div class="session-title">Calentamiento</div>
-        <ul class="session-items">
-          <li>Hip circles, torso rotations, band pull-aparts</li>
-        </ul>
-      </div>
-      <div class="session-block">
-        <div class="session-title">Fuerza</div>
-        <ul class="session-items">
-          <li>Goblet squat 4×10</li>
-          <li>Romanian deadlift 4×10</li>
-          <li>Lat pulldown + fila 3×12</li>
-        </ul>
-      </div>
-      <div class="session-block">
-        <div class="session-title">Rotación & Core</div>
-        <ul class="session-items">
-          <li>Cable rotation / Pallof press 3×12</li>
-          <li>Plank + dead bug + med ball slam rotacional</li>
-        </ul>
-      </div>
-      <div class="day-notes">
-        <label>Notas de sesión</label>
-        <textarea id="notes-2" placeholder="Pesos, series, sensaciones..." oninput="saveNotes(2)"></textarea>
-      </div>
-      <button class="save-btn" onclick="toggleCheck(event,2)">Marcar completado</button>
-    </div>
-  </div>
 
-  <!-- DÍA 3 -->
-  <div class="day-card" id="card-3">
-    <div class="day-header" onclick="toggleDay(3)">
-      <div class="day-num">3</div>
-      <div class="day-info">
-        <div class="day-title">Range — Full Bag + Driver</div>
-        <div class="day-meta">~60 min</div>
+    <!-- DÍA 3: RANGE FULL BAG -->
+    <div class="day-card" id="card-3">
+      <div class="day-header">
+        <div>
+          <div class="day-label">DÍA 3 — JUEVES</div>
+          <div class="day-title">Range · Full Bag & Driver <span class="badge">60 min</span></div>
+          <div class="day-meta">Todas las palos, foco en driver y hierros largos</div>
+        </div>
+        <button class="check-btn" id="chk-3" onclick="toggleDay(3)">✓</button>
       </div>
-      <div class="day-check" onclick="toggleCheck(event,3)" id="check-3"></div>
+      <div class="exercises">
+        <div class="ex-item"><div class="ex-dot"></div><span>Stretching + calentamiento con hierro corto: 10 min</span></div>
+        <div class="ex-item"><div class="ex-dot"></div><span>Hierros medios (6i–8i): 20 bolas con target específico</span></div>
+        <div class="ex-item"><div class="ex-dot"></div><span>Hierros largos / híbrido: 15 bolas (3H o 2H)</span></div>
+        <div class="ex-item"><div class="ex-dot"></div><span>Driver: 20 bolas con foco en fairway (no distancia)</span></div>
+        <div class="ex-item"><div class="ex-dot"></div><span>Putting range: 15 min (putts de 6, 10 y 20 pies)</span></div>
+      </div>
     </div>
-    <div class="day-body" id="body-3" style="display:none">
-      <div class="session-block">
-        <div class="session-title">Full Bag Completo</div>
-        <ul class="session-items">
-          <li>60°→56°→52°→PW→9i→8i→7i→6i→5i→4H→3H→driver</li>
-          <li>3-4 bolas por palo, contacto limpio</li>
-        </ul>
-      </div>
-      <div class="session-block">
-        <div class="session-title">Driver (15 min)</div>
-        <ul class="session-items">
-          <li>Enfoque: fairway, no distancia</li>
-        </ul>
-      </div>
-      <div class="session-block">
-        <div class="session-title">Opcional</div>
-        <ul class="session-items">
-          <li>15 min putting si hay green disponible</li>
-        </ul>
-      </div>
-      <div class="day-notes">
-        <label>Notas de sesión</label>
-        <textarea id="notes-3" placeholder="¿Cómo estuvo el driver? ¿Algún palo a trabajar?" oninput="saveNotes(3)"></textarea>
-      </div>
-      <button class="save-btn" onclick="toggleCheck(event,3)">Marcar completado</button>
-    </div>
-  </div>
 
-  <!-- DÍA 4 — RONDA -->
-  <div class="day-card" id="card-4">
-    <div class="day-header" onclick="toggleDay(4)">
-      <div class="day-num">4</div>
-      <div class="day-info">
-        <div class="day-title">Ronda Oficial — 18 Hoyos</div>
-        <div class="day-meta">GHIN · Viernes</div>
+    <!-- DÍA 4: RONDA -->
+    <div class="day-card" id="card-4">
+      <div class="day-header">
+        <div>
+          <div class="day-label">DÍA 4 — VIERNES</div>
+          <div class="day-title">Ronda oficial 18 hoyos <span class="badge">GHIN</span></div>
+          <div class="day-meta">Registrar score, putts y dobles</div>
+        </div>
+        <button class="check-btn" id="chk-4" onclick="toggleDay(4)">✓</button>
       </div>
-      <div class="day-check" onclick="toggleCheck(event,4)" id="check-4"></div>
-    </div>
-    <div class="day-body" id="body-4" style="display:none">
-      <div class="session-block">
-        <div class="session-title">Post-ronda — analiza</div>
-        <ul class="session-items">
-          <li>¿Cuántos 3-putts?</li>
-          <li>¿Hoyos perdidos entre 50-100 yardas?</li>
-          <li>¿Cuántos dobles o peores?</li>
-        </ul>
-      </div>
-      <div class="round-inputs">
-        <div class="round-field">
+      <div class="round-fields four-col">
+        <div class="field-group">
+          <label>Cancha</label>
+          <select id="course-4">
+            <option value="">—</option>
+            <option>Miami Beach</option>
+            <option>Doral</option>
+            <option>Crandon</option>
+            <option>Soffer</option>
+            <option>Miami Lakes</option>
+            <option>Otra</option>
+          </select>
+        </div>
+        <div class="field-group">
           <label>Score</label>
-          <input type="number" id="r4-score" placeholder="82" min="60" max="130" oninput="saveRound(4)">
+          <input type="number" id="score-4" placeholder="84" min="60" max="140">
         </div>
-        <div class="round-field">
+        <div class="field-group">
           <label>Putts</label>
-          <input type="number" id="r4-putts" placeholder="32" min="18" max="50" oninput="saveRound(4)">
+          <input type="number" id="putts-4" placeholder="32" min="18" max="60">
         </div>
-        <div class="round-field">
+        <div class="field-group">
           <label>Dobles+</label>
-          <input type="number" id="r4-doubles" placeholder="3" min="0" max="18" oninput="saveRound(4)">
+          <input type="number" id="doubles-4" placeholder="3" min="0" max="18">
         </div>
       </div>
-      <div class="round-notes-row">
-        <label>Cancha</label>
-        <input type="text" id="r4-course" placeholder="Miami Lakes, Doral..." oninput="saveRound(4)">
-      </div>
-      <div class="day-notes">
-        <label>Notas post-ronda</label>
-        <textarea id="notes-4" placeholder="¿Qué funcionó? ¿Qué trabaja el Día 1 próxima semana?" oninput="saveNotes(4)"></textarea>
-      </div>
-      <button class="save-btn" onclick="toggleCheck(event,4)">Marcar completado</button>
     </div>
-  </div>
 
-  <!-- DÍA 5 OPCIONAL -->
-  <div class="day-card optional-day" id="card-5">
-    <div class="day-header" onclick="toggleDay(5)">
-      <div class="day-num" style="color:var(--blue)">5</div>
-      <div class="day-info">
-        <div class="day-title">Segunda Ronda <span class="optional-badge">Opcional</span></div>
-        <div class="day-meta">Fin de semana</div>
+    <!-- DÍA 5: RONDA OPCIONAL -->
+    <div class="day-card optional" id="card-5">
+      <div class="day-header">
+        <div>
+          <div class="day-label">DÍA 5 — FIN DE SEMANA</div>
+          <div class="day-title">Ronda extra (opcional) <span class="badge opt">OPT</span></div>
+          <div class="day-meta">Sábado o domingo · Sin presión</div>
+        </div>
+        <button class="check-btn" id="chk-5" onclick="toggleDay(5)">✓</button>
       </div>
-      <div class="day-check" onclick="toggleCheck(event,5)" id="check-5" style="border-color:rgba(96,165,250,0.3)"></div>
-    </div>
-    <div class="day-body" id="body-5" style="display:none">
-      <div class="session-block">
-        <div class="session-title">Ronda adicional — aplica lo aprendido</div>
-        <ul class="session-items">
-          <li>Usa las notas del Día 4 como guía</li>
-          <li>Practica el área débil identificada</li>
-          <li>Registra en GHIN si es oficial</li>
-        </ul>
-      </div>
-      <div class="round-inputs">
-        <div class="round-field">
+      <div class="round-fields four-col">
+        <div class="field-group">
+          <label>Cancha</label>
+          <select id="course-5">
+            <option value="">—</option>
+            <option>Miami Beach</option>
+            <option>Doral</option>
+            <option>Crandon</option>
+            <option>Soffer</option>
+            <option>Miami Lakes</option>
+            <option>Otra</option>
+          </select>
+        </div>
+        <div class="field-group">
           <label>Score</label>
-          <input type="number" id="r5-score" placeholder="82" min="60" max="130" oninput="saveRound(5)">
+          <input type="number" id="score-5" placeholder="84" min="60" max="140">
         </div>
-        <div class="round-field">
+        <div class="field-group">
           <label>Putts</label>
-          <input type="number" id="r5-putts" placeholder="32" min="18" max="50" oninput="saveRound(5)">
+          <input type="number" id="putts-5" placeholder="32" min="18" max="60">
         </div>
-        <div class="round-field">
+        <div class="field-group">
           <label>Dobles+</label>
-          <input type="number" id="r5-doubles" placeholder="3" min="0" max="18" oninput="saveRound(5)">
+          <input type="number" id="doubles-5" placeholder="3" min="0" max="18">
         </div>
       </div>
-      <div class="round-notes-row">
-        <label>Cancha</label>
-        <input type="text" id="r5-course" placeholder="Miami Lakes, Doral..." oninput="saveRound(5)">
+    </div>
+
+    <button class="btn-save" style="width:100%;padding:12px;margin-top:4px" onclick="saveWeek()">💾 Guardar semana</button>
+  </div>
+
+  <!-- ═══════════ TAB: PROGRESO ═══════════ -->
+  <div id="tab-progreso" class="tab-panel">
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-val" id="stat-rounds">0</div>
+        <div class="stat-label">Rondas</div>
       </div>
-      <div class="day-notes">
-        <label>Notas</label>
-        <textarea id="notes-5" placeholder="¿Qué mejoró respecto a la ronda del Día 4?" oninput="saveNotes(5)"></textarea>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-avg-score">—</div>
+        <div class="stat-label">Avg Score</div>
       </div>
-      <button class="save-btn" style="border-color:rgba(96,165,250,0.3);color:var(--blue);background:rgba(96,165,250,0.07)" onclick="toggleCheck(event,5)">Marcar completado</button>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-sessions">0</div>
+        <div class="stat-label">Sesiones</div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">📊 Score por ronda</div>
+      <canvas id="score-chart" height="140"></canvas>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">📅 Días completados por semana</div>
+      <canvas id="days-chart" height="120"></canvas>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">📋 Historial de rondas</div>
+      <table class="hcp-table">
+        <thead>
+          <tr>
+            <th>Sem</th><th>Día</th><th>Cancha</th><th>Score</th><th>Putts</th><th>Dobles</th>
+          </tr>
+        </thead>
+        <tbody id="rounds-tbody">
+          <tr><td colspan="6" class="empty-state">Sin rondas aún</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════ TAB: HANDICAP ═══════════ -->
+  <div id="tab-handicap" class="tab-panel">
+
+    <div class="hcp-form">
+      <div class="hcp-form-title">📌 Actualizar Handicap</div>
+      <div class="hcp-input-row">
+        <div class="field-group">
+          <label>Fecha</label>
+          <input type="date" id="hcp-date">
+        </div>
+        <div class="field-group">
+          <label>Nuevo índice</label>
+          <input type="number" id="hcp-input" placeholder="12.5" step="0.1" min="0" max="54">
+        </div>
+        <button class="btn-save" onclick="saveHcp()">Guardar</button>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">📉 Progreso del handicap</div>
+      <canvas id="hcp-chart" height="160"></canvas>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">📋 Historial</div>
+      <table class="hcp-table">
+        <thead>
+          <tr><th>Fecha</th><th>Índice</th><th>Δ</th></tr>
+        </thead>
+        <tbody id="hcp-tbody">
+          <tr><td colspan="3" class="empty-state">Sin registros aún</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
 </div>
 
-<!-- ═══════════════ PROGRESO TAB ═══════════════ -->
-<div class="tab-panel" id="tab-progreso">
-  <p class="section-title">RESUMEN</p>
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-val" id="stat-sessions">—</div>
-      <div class="stat-label">Sesiones</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-val" id="stat-rounds">—</div>
-      <div class="stat-label">Rondas</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-val" id="stat-avg-score">—</div>
-      <div class="stat-label">Score prom.</div>
-    </div>
-  </div>
-
-  <div class="chart-card">
-    <div class="chart-title">Score por ronda</div>
-    <canvas id="score-chart" height="180"></canvas>
-  </div>
-
-  <div class="chart-card">
-    <div class="chart-title">Días completados por semana</div>
-    <canvas id="days-chart" height="140"></canvas>
-  </div>
-
-  <p class="section-title" style="margin-top:4px">HISTORIAL DE RONDAS</p>
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden">
-    <table class="history-table">
-      <thead><tr>
-        <th>Semana</th>
-        <th>Día</th>
-        <th>Cancha</th>
-        <th>Score</th>
-        <th>Putts</th>
-        <th>Dbl+</th>
-      </tr></thead>
-      <tbody id="rounds-tbody"><tr><td colspan="6" class="empty-state">Sin rondas aún</td></tr></tbody>
-    </table>
-  </div>
-</div>
-
-<!-- ═══════════════ HANDICAP TAB ═══════════════ -->
-<div class="tab-panel" id="tab-handicap">
-  <p class="section-title">ACTUALIZAR HCP</p>
-  <div class="hcp-update-form">
-    <div class="field">
-      <label>Nuevo índice</label>
-      <input type="number" id="hcp-input" placeholder="12.9" step="0.1" min="0" max="54">
-    </div>
-    <div class="field">
-      <label>Fecha</label>
-      <input type="date" id="hcp-date">
-    </div>
-    <button class="hcp-add-btn" onclick="addHcpEntry()">+ Agregar</button>
-  </div>
-
-  <div class="chart-card">
-    <div class="chart-title">Progreso del índice — meta: 10.0 en diciembre</div>
-    <canvas id="hcp-chart" height="200"></canvas>
-  </div>
-
-  <p class="section-title">HISTORIAL</p>
-  <div class="hcp-history" id="hcp-history">
-    <div class="empty-state">Sin registros aún</div>
-  </div>
-</div>
-
-</div><!-- /content -->
-
-<!-- MODAL HCP QUICK UPDATE -->
+<!-- MODAL HCP -->
 <div class="modal-overlay" id="hcp-modal">
   <div class="modal">
-    <h3>Actualizar Handicap</h3>
-    <input type="number" id="modal-hcp-input" placeholder="12.4" step="0.1" min="0" max="54">
-    <div class="modal-btns">
-      <button class="modal-btn cancel" onclick="closeHcpModal()">Cancelar</button>
-      <button class="modal-btn confirm" onclick="saveHcpFromModal()">Guardar</button>
+    <div class="modal-title">Actualizar Handicap</div>
+    <div class="hcp-input-row">
+      <div class="field-group">
+        <label>Fecha</label>
+        <input type="date" id="modal-hcp-date">
+      </div>
+      <div class="field-group">
+        <label>Nuevo índice</label>
+        <input type="number" id="modal-hcp-input" placeholder="12.5" step="0.1" min="0" max="54">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeHcpModal()">Cancelar</button>
+      <button class="btn-save" style="flex:1" onclick="saveHcpModal()">Guardar</button>
     </div>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-// ─── STATE ───────────────────────────────────────────
+// ─── CONSTANTS ────────────────────────────────────────────
+const WEEK1_START = new Date('2026-06-01T00:00:00');
+const GOAL_HCP = 10.0;
+const INITIAL_HCP = 12.8;
+
+// ─── STATE ────────────────────────────────────────────────
+let data = {};
+let hcpHistory = [];
 let currentWeek = 1;
-let appData = {
-  currentHcp: 12.9,
-  hcpHistory: [],
-  weeks: {}
-};
+let scoreChartInst = null;
+let daysChartInst  = null;
+let hcpChartInst   = null;
 
-function getStartOfWeek1() {
-  const d = new Date('2026-01-05');
-  return d;
-}
-function getWeekDates(weekNum) {
-  const start = new Date(getStartOfWeek1());
-  start.setDate(start.getDate() + (weekNum - 1) * 7);
-  const end = new Date(start);
-  end.setDate(end.getDate() + 6);
-  const fmt = d => d.toLocaleDateString('es', { day:'numeric', month:'short' });
-  return `${fmt(start)} – ${fmt(end)}`;
-}
-function getCurrentWeek() {
-  const now = new Date();
-  const start = getStartOfWeek1();
-  const diff = Math.floor((now - start) / (7 * 24 * 3600 * 1000));
-  return Math.max(1, diff + 1);
-}
-
-// ─── STORAGE ─────────────────────────────────────────
+// ─── STORAGE ──────────────────────────────────────────────
 function save() {
-  localStorage.setItem('diegolfa_training', JSON.stringify(appData));
+  localStorage.setItem('diegolfa_training', JSON.stringify(data));
+  localStorage.setItem('diegolfa_hcp', JSON.stringify(hcpHistory));
 }
 function load() {
-  const raw = localStorage.getItem('diegolfa_training');
-  if (raw) {
-    try { appData = JSON.parse(raw); } catch(e) {}
-  }
-  if (!appData.hcpHistory) appData.hcpHistory = [];
-  if (!appData.weeks) appData.weeks = {};
-  if (appData.hcpHistory.length === 0) {
-    appData.hcpHistory.push({ date: '2026-01-01', value: 12.9 });
-    save();
+  try {
+    const d = localStorage.getItem('diegolfa_training');
+    const h = localStorage.getItem('diegolfa_hcp');
+    data       = d ? JSON.parse(d) : {};
+    hcpHistory = h ? JSON.parse(h) : [];
+    if (hcpHistory.length === 0) {
+      hcpHistory.push({ date: '2026-06-01', value: INITIAL_HCP });
+      save();
+    }
+  } catch(e) {
+    data = {}; hcpHistory = [];
   }
 }
 
-// ─── WEEK DATA ────────────────────────────────────────
-function getWeek(w) {
-  if (!appData.weeks[w]) appData.weeks[w] = { checks: {}, notes: {}, rounds: {} };
-  return appData.weeks[w];
+// ─── WEEK HELPERS ─────────────────────────────────────────
+function getWeekKey(w) { return 'w' + w; }
+
+function getWeekDates(w) {
+  const start = new Date(WEEK1_START);
+  start.setDate(start.getDate() + (w - 1) * 7);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 6);
+  const fmt = d => d.toLocaleDateString('es', { month: 'short', day: 'numeric' });
+  return { start, end, label: `${fmt(start)} – ${fmt(end)}` };
 }
 
-// ─── TABS ─────────────────────────────────────────────
+function getCurrentWeek() {
+  const now = new Date();
+  const diff = now - WEEK1_START;
+  if (diff < 0) return 1;
+  return Math.floor(diff / (7 * 24 * 3600 * 1000)) + 1;
+}
+
+// ─── TAB SWITCH ───────────────────────────────────────────
 function switchTab(name) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   event.target.classList.add('active');
   if (name === 'progreso') renderProgreso();
-  if (name === 'handicap') { renderHcpHistory(); renderHcpChart(); }
+  if (name === 'handicap') renderHandicap();
 }
 
-// ─── WEEK NAV ─────────────────────────────────────────
+// ─── RENDER WEEK ──────────────────────────────────────────
+function renderWeek() {
+  const wk = getWeekKey(currentWeek);
+  const wd = getWeekDates(currentWeek);
+  document.getElementById('week-label').textContent = 'SEMANA ' + currentWeek;
+  document.getElementById('week-dates').textContent = wd.label;
+
+  const wdata = data[wk] || { days: {}, scores: {} };
+
+  [1,2,3,4,5].forEach(d => {
+    const done = !!(wdata.days && wdata.days[d]);
+    const card = document.getElementById('card-' + d);
+    const chk  = document.getElementById('chk-' + d);
+    if (done) { card.classList.add('done'); chk.classList.add('done'); }
+    else       { card.classList.remove('done'); chk.classList.remove('done'); }
+
+    if (d === 4 || d === 5) {
+      const sc = wdata.scores && wdata.scores[d] ? wdata.scores[d] : {};
+      const pfx = d === 4 ? '4' : '5';
+      document.getElementById('score-' + pfx).value   = sc.score   || '';
+      document.getElementById('putts-' + pfx).value   = sc.putts   || '';
+      document.getElementById('doubles-' + pfx).value = sc.doubles || '';
+      document.getElementById('course-' + pfx).value  = sc.course  || '';
+    }
+  });
+}
+
+// ─── TOGGLE DAY ───────────────────────────────────────────
+function toggleDay(d) {
+  const wk = getWeekKey(currentWeek);
+  if (!data[wk]) data[wk] = { days: {}, scores: {} };
+  data[wk].days[d] = !data[wk].days[d];
+  save();
+  renderWeek();
+}
+
+// ─── SAVE WEEK ────────────────────────────────────────────
+function saveWeek() {
+  const wk = getWeekKey(currentWeek);
+  if (!data[wk]) data[wk] = { days: {}, scores: {} };
+  if (!data[wk].scores) data[wk].scores = {};
+
+  [4, 5].forEach(d => {
+    const pfx = String(d);
+    const score   = document.getElementById('score-' + pfx).value;
+    const putts   = document.getElementById('putts-' + pfx).value;
+    const doubles = document.getElementById('doubles-' + pfx).value;
+    const course  = document.getElementById('course-' + pfx).value;
+    if (score) {
+      data[wk].scores[d] = { score: +score, putts: putts ? +putts : null, doubles: doubles ? +doubles : null, course };
+    }
+  });
+
+  save();
+  renderWeek();
+
+  const btn = event.target;
+  btn.textContent = '✅ Guardado';
+  setTimeout(() => { btn.textContent = '💾 Guardar semana'; }, 1500);
+}
+
+// ─── WEEK NAVIGATION ──────────────────────────────────────
 function changeWeek(dir) {
   currentWeek = Math.max(1, currentWeek + dir);
   renderWeek();
 }
-function renderWeek() {
-  document.getElementById('week-label').textContent = `SEMANA ${currentWeek}`;
-  document.getElementById('week-dates').textContent = getWeekDates(currentWeek);
-  const wd = getWeek(currentWeek);
-  for (let d = 1; d <= 5; d++) {
-    const card = document.getElementById('card-' + d);
-    const check = document.getElementById('check-' + d);
-    const done = !!wd.checks[d];
-    if (done) { card.classList.add('done'); check.textContent = '✓'; }
-    else { card.classList.remove('done'); check.textContent = ''; }
-    const ta = document.getElementById('notes-' + d);
-    if (ta) ta.value = wd.notes[d] || '';
-    if (d === 4 || d === 5) {
-      const r = wd.rounds[d] || {};
-      const scoreEl = document.getElementById('r' + d + '-score');
-      const puttsEl = document.getElementById('r' + d + '-putts');
-      const doublesEl = document.getElementById('r' + d + '-doubles');
-      const courseEl = document.getElementById('r' + d + '-course');
-      if (scoreEl) scoreEl.value = r.score || '';
-      if (puttsEl) puttsEl.value = r.putts || '';
-      if (doublesEl) doublesEl.value = r.doubles || '';
-      if (courseEl) courseEl.value = r.course || '';
-    }
-  }
-}
 
-// ─── DAY INTERACTIONS ────────────────────────────────
-function toggleDay(d) {
-  const body = document.getElementById('body-' + d);
-  body.style.display = body.style.display === 'none' ? 'block' : 'none';
-}
-function toggleCheck(e, d) {
-  e.stopPropagation();
-  const wd = getWeek(currentWeek);
-  wd.checks[d] = !wd.checks[d];
-  save();
-  renderWeek();
-}
-function saveNotes(d) {
-  const wd = getWeek(currentWeek);
-  const ta = document.getElementById('notes-' + d);
-  wd.notes[d] = ta ? ta.value : '';
-  save();
-}
-function saveRound(d) {
-  const wd = getWeek(currentWeek);
-  if (!wd.rounds) wd.rounds = {};
-  wd.rounds[d] = {
-    score: document.getElementById('r' + d + '-score').value,
-    putts: document.getElementById('r' + d + '-putts').value,
-    doubles: document.getElementById('r' + d + '-doubles').value,
-    course: document.getElementById('r' + d + '-course').value
-  };
-  save();
-}
-
-// ─── HANDICAP ────────────────────────────────────────
+// ─── HCP WIDGET ───────────────────────────────────────────
 function renderHcpWidget() {
-  const cur = appData.currentHcp;
-  document.getElementById('hcp-display').textContent = parseFloat(cur).toFixed(1);
-  const start = 12.9, goal = 10.0;
-  const pct = Math.min(100, Math.max(0, ((start - cur) / (start - goal)) * 100));
-  document.getElementById('hcp-fill').style.width = pct.toFixed(1) + '%';
-  document.getElementById('hcp-pct').textContent = pct.toFixed(0) + '%';
+  const current = hcpHistory.length > 0 ? hcpHistory[hcpHistory.length - 1].value : INITIAL_HCP;
+  document.getElementById('hdr-current').textContent = current.toFixed(1);
 }
+
+// ─── MODAL ────────────────────────────────────────────────
 function openHcpModal() {
-  document.getElementById('modal-hcp-input').value = '';
   document.getElementById('hcp-modal').classList.add('open');
+  document.getElementById('modal-hcp-date').value = new Date().toISOString().slice(0,10);
 }
 function closeHcpModal() {
   document.getElementById('hcp-modal').classList.remove('open');
 }
-function saveHcpFromModal() {
-  const val = parseFloat(document.getElementById('modal-hcp-input').value);
-  if (isNaN(val) || val < 0 || val > 54) return;
-  const today = new Date().toISOString().slice(0,10);
-  appData.currentHcp = val;
-  appData.hcpHistory.push({ date: today, value: val });
-  appData.hcpHistory.sort((a,b) => a.date.localeCompare(b.date));
+function saveHcpModal() {
+  const date = document.getElementById('modal-hcp-date').value;
+  const val  = parseFloat(document.getElementById('modal-hcp-input').value);
+  if (!date || isNaN(val)) return;
+  hcpHistory.push({ date, value: val });
+  hcpHistory.sort((a,b) => a.date.localeCompare(b.date));
   save();
   renderHcpWidget();
   closeHcpModal();
-  if (document.getElementById('tab-handicap').classList.contains('active')) {
-    renderHcpHistory(); renderHcpChart();
-  }
+  document.getElementById('modal-hcp-input').value = '';
 }
-function addHcpEntry() {
-  const val = parseFloat(document.getElementById('hcp-input').value);
+
+// ─── HCP TAB ──────────────────────────────────────────────
+function saveHcp() {
   const date = document.getElementById('hcp-date').value;
-  if (isNaN(val) || !date) return;
-  appData.currentHcp = val;
-  appData.hcpHistory.push({ date, value: val });
-  appData.hcpHistory.sort((a,b) => a.date.localeCompare(b.date));
+  const val  = parseFloat(document.getElementById('hcp-input').value);
+  if (!date || isNaN(val)) return;
+  hcpHistory.push({ date, value: val });
+  hcpHistory.sort((a,b) => a.date.localeCompare(b.date));
   save();
   renderHcpWidget();
-  renderHcpHistory();
-  renderHcpChart();
+  renderHandicap();
   document.getElementById('hcp-input').value = '';
-  document.getElementById('hcp-date').value = '';
-}
-function deleteHcpEntry(i) {
-  appData.hcpHistory.splice(i, 1);
-  if (appData.hcpHistory.length > 0) {
-    appData.currentHcp = appData.hcpHistory[appData.hcpHistory.length - 1].value;
-  }
-  save();
-  renderHcpWidget();
-  renderHcpHistory();
-  renderHcpChart();
-}
-function renderHcpHistory() {
-  const el = document.getElementById('hcp-history');
-  if (!appData.hcpHistory.length) { el.innerHTML = '<div class="empty-state">Sin registros</div>'; return; }
-  const rows = appData.hcpHistory.slice().reverse().map((h, ri) => {
-    const realIdx = appData.hcpHistory.length - 1 - ri;
-    const prev = realIdx > 0 ? appData.hcpHistory[realIdx - 1].value : null;
-    const delta = prev !== null ? (h.value - prev).toFixed(1) : null;
-    const deltaHtml = delta !== null
-      ? `<span class="hcp-row-delta ${parseFloat(delta) < 0 ? 'delta-down' : 'delta-up'}">${parseFloat(delta) > 0 ? '+' : ''}${delta}</span>`
-      : '<span class="hcp-row-delta" style="color:var(--muted)">—</span>';
-    const fmt = new Date(h.date + 'T12:00:00').toLocaleDateString('es', { day:'numeric', month:'short', year:'numeric' });
-    return `<div class="hcp-row">
-      <div class="hcp-row-date">${fmt}</div>
-      <div class="hcp-row-val">${parseFloat(h.value).toFixed(1)}</div>
-      ${deltaHtml}
-      <button class="hcp-row-del" onclick="deleteHcpEntry(${realIdx})">✕</button>
-    </div>`;
-  }).join('');
-  el.innerHTML = rows;
 }
 
-let hcpChartInst = null;
-function renderHcpChart() {
-  const history = appData.hcpHistory;
-  const ctx = document.getElementById('hcp-chart').getContext('2d');
-  if (hcpChartInst) hcpChartInst.destroy();
-
-  const labels = history.map(h => {
-    const d = new Date(h.date + 'T12:00:00');
-    return d.toLocaleDateString('es', { day:'numeric', month:'short' });
+function renderHandicap() {
+  const labels = hcpHistory.map(h => {
+    const d = new Date(h.date + 'T00:00:00');
+    return d.toLocaleDateString('es', { month: 'short', day: 'numeric' });
   });
-  const values = history.map(h => h.value);
+  const values = hcpHistory.map(h => h.value);
 
-  const projLabels = [...labels, 'Dic 2026'];
-  const projValues = [...values, null];
-  const goalLine = new Array(projLabels.length).fill(10.0);
+  const minVal = Math.min(...values, GOAL_HCP);
+  const maxVal = Math.max(...values, INITIAL_HCP);
+  const yMin = Math.max(0, Math.floor((minVal - 0.5) * 2) / 2);
+  const yMax = Math.ceil((maxVal + 0.5) * 2) / 2;
 
-  const allVals = values.filter(v => v != null);
-  const maxHcp = Math.max(...allVals, 13.5);
-  const yMin = 9.0;
-  const yMax = Math.ceil(maxHcp) + 0.5;
-
-  hcpChartInst = new Chart(ctx, {
+  const ctxH = document.getElementById('hcp-chart').getContext('2d');
+  if (hcpChartInst) hcpChartInst.destroy();
+  hcpChartInst = new Chart(ctxH, {
     type: 'line',
     data: {
-      labels: projLabels,
+      labels,
       datasets: [
         {
           label: 'Handicap',
-          data: projValues,
-          borderColor: '#f0c040',
-          backgroundColor: 'rgba(240,192,64,0.1)',
-          borderWidth: 2.5,
-          pointBackgroundColor: '#f0c040',
+          data: values,
+          borderColor: '#4ade80',
+          backgroundColor: 'rgba(74,222,128,0.08)',
+          borderWidth: 2,
+          pointBackgroundColor: '#4ade80',
           pointRadius: 5,
           tension: 0.3,
-          fill: false,
-          spanGaps: false
+          fill: true
         },
         {
-          label: 'Meta 10.0',
-          data: goalLine,
-          borderColor: '#4ade80',
-          borderDash: [6, 4],
+          label: 'Meta (10.0)',
+          data: Array(labels.length).fill(GOAL_HCP),
+          borderColor: '#f0c040',
           borderWidth: 1.5,
+          borderDash: [5,5],
           pointRadius: 0,
-          fill: false,
-          tension: 0
+          fill: false
         }
       ]
     },
@@ -1120,12 +890,8 @@ function renderHcpChart() {
       responsive: true,
       plugins: {
         legend: {
-          labels: { color: '#6b8c6b', font: { size: 11 } }
-        },
-        tooltip: {
-          callbacks: {
-            label: ctx => ctx.dataset.label + ': ' + (ctx.parsed.y != null ? ctx.parsed.y.toFixed(1) : '—')
-          }
+          display: true,
+          labels: { color: '#6b8c6b', font: { size: 10 }, boxWidth: 20 }
         }
       },
       scales: {
@@ -1146,7 +912,7 @@ function renderHcpChart() {
           grid: { color: '#1e2b1e' },
           title: {
             display: true,
-            text: '← Mejorando',
+            text: '← Mejor',
             color: '#4ade80',
             font: { size: 10 }
           }
@@ -1154,58 +920,79 @@ function renderHcpChart() {
       }
     }
   });
+
+  const tbody = document.getElementById('hcp-tbody');
+  if (hcpHistory.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="3" class="empty-state">Sin registros</td></tr>';
+    return;
+  }
+  tbody.innerHTML = hcpHistory.slice().reverse().map((h, i, arr) => {
+    const prev = arr[i + 1];
+    let delta = '—';
+    let cls = '';
+    if (prev) {
+      const d = (h.value - prev.value).toFixed(1);
+      if (d < 0) { delta = d; cls = 'delta-neg'; }
+      else if (d > 0) { delta = '+' + d; cls = 'delta-pos'; }
+      else delta = '0.0';
+    }
+    const dateStr = new Date(h.date + 'T00:00:00').toLocaleDateString('es', { month: 'short', day: 'numeric', year: '2-digit' });
+    return `<tr>
+      <td>${dateStr}</td>
+      <td><strong>${h.value.toFixed(1)}</strong></td>
+      <td class="${cls}">${delta}</td>
+    </tr>`;
+  }).join('');
 }
 
-// ─── PROGRESO ─────────────────────────────────────────
-let scoreChartInst = null;
-let daysChartInst = null;
+// ─── PROGRESO TAB ─────────────────────────────────────────
 function renderProgreso() {
   const rounds = [];
   const weekSessions = [];
-  const weeks = Object.keys(appData.weeks).map(Number).sort((a,b)=>a-b);
 
-  weeks.forEach(w => {
-    const wd = appData.weeks[w];
-    let sesCount = 0;
-    for (let d = 1; d <= 5; d++) {
-      if (wd.checks && wd.checks[d]) sesCount++;
+  Object.keys(data).sort().forEach(wk => {
+    const w = parseInt(wk.replace('w',''));
+    const wdata = data[wk];
+    let sessionCount = 0;
+    if (wdata.days) {
+      sessionCount = Object.values(wdata.days).filter(Boolean).length;
     }
-    weekSessions.push({ week: w, count: sesCount });
-    if (wd.rounds) {
+    if (sessionCount > 0) weekSessions.push({ week: w, count: sessionCount });
+    if (wdata.scores) {
       [4, 5].forEach(d => {
-        const r = wd.rounds[d];
-        if (r && r.score) {
-          rounds.push({ week: w, day: d, score: parseInt(r.score), putts: parseInt(r.putts)||0, doubles: parseInt(r.doubles)||0, course: r.course || '' });
+        if (wdata.scores[d] && wdata.scores[d].score) {
+          rounds.push({ week: w, day: d, ...wdata.scores[d] });
         }
       });
     }
   });
 
-  document.getElementById('stat-sessions').textContent = weeks.reduce((s,w) => {
-    const wd = appData.weeks[w];
-    let c = 0; for(let d=1;d<=5;d++) if(wd.checks&&wd.checks[d]) c++;
-    return s+c;
-  }, 0);
   document.getElementById('stat-rounds').textContent = rounds.length;
-  const scores = rounds.map(r=>r.score).filter(Boolean);
-  document.getElementById('stat-avg-score').textContent = scores.length ? (scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1) : '—';
+  document.getElementById('stat-sessions').textContent = Object.values(data).reduce((acc, wdata) => {
+    return acc + (wdata.days ? Object.values(wdata.days).filter(Boolean).length : 0);
+  }, 0);
+  if (rounds.length > 0) {
+    const avg = (rounds.reduce((a, r) => a + r.score, 0) / rounds.length).toFixed(1);
+    document.getElementById('stat-avg-score').textContent = avg;
+  } else {
+    document.getElementById('stat-avg-score').textContent = '—';
+  }
 
   const ctxS = document.getElementById('score-chart').getContext('2d');
   if (scoreChartInst) scoreChartInst.destroy();
   if (rounds.length === 0) {
-    ctxS.clearRect(0,0,400,180);
+    ctxS.clearRect(0,0,400,140);
   } else {
     scoreChartInst = new Chart(ctxS, {
       type: 'line',
       data: {
-        labels: rounds.map((r,i) => `S${r.week} D${r.day}`),
+        labels: rounds.map(r => `S${r.week}D${r.day}`),
         datasets: [{
-          label: 'Score',
-          data: rounds.map(r=>r.score),
-          borderColor: '#f0c040',
-          backgroundColor: 'rgba(240,192,64,0.08)',
+          data: rounds.map(r => r.score),
+          borderColor: '#4ade80',
+          backgroundColor: 'rgba(74,222,128,0.08)',
           borderWidth: 2,
-          pointBackgroundColor: '#f0c040',
+          pointBackgroundColor: '#4ade80',
           pointRadius: 4,
           tension: 0.3,
           fill: true
@@ -1216,12 +1003,7 @@ function renderProgreso() {
         plugins: { legend: { display: false } },
         scales: {
           x: { ticks: { color:'#6b8c6b', font:{size:10} }, grid:{color:'#1e2b1e'} },
-          y: {
-            reverse: true,
-            ticks: { color:'#6b8c6b', font:{size:10} },
-            grid: { color:'#1e2b1e' },
-            title: { display: true, text: '← Mejor', color: '#4ade80', font:{size:10} }
-          }
+          y: { ticks: { color:'#6b8c6b', font:{size:10} }, grid:{color:'#1e2b1e'} }
         }
       }
     });
@@ -1230,15 +1012,14 @@ function renderProgreso() {
   const ctxD = document.getElementById('days-chart').getContext('2d');
   if (daysChartInst) daysChartInst.destroy();
   if (weekSessions.length === 0) {
-    ctxD.clearRect(0,0,400,140);
+    ctxD.clearRect(0,0,400,120);
   } else {
     daysChartInst = new Chart(ctxD, {
       type: 'bar',
       data: {
         labels: weekSessions.map(w => `S${w.week}`),
         datasets: [{
-          label: 'Días completados',
-          data: weekSessions.map(w=>w.count),
+          data: weekSessions.map(w => w.count),
           backgroundColor: weekSessions.map(w => w.count >= 4 ? 'rgba(74,222,128,0.5)' : 'rgba(240,192,64,0.4)'),
           borderColor: weekSessions.map(w => w.count >= 4 ? '#4ade80' : '#f0c040'),
           borderWidth: 1,
@@ -1264,7 +1045,7 @@ function renderProgreso() {
       <tr>
         <td>S${r.week}</td>
         <td>Día ${r.day}</td>
-        <td style="font-size:12px;color:var(--muted)">${r.course || '—'}</td>
+        <td style="font-size:11px;color:var(--muted)">${r.course || '—'}</td>
         <td><span class="score-chip">${r.score}</span></td>
         <td>${r.putts || '—'}</td>
         <td>${r.doubles || '—'}</td>
@@ -1272,7 +1053,7 @@ function renderProgreso() {
   }
 }
 
-// ─── INIT ─────────────────────────────────────────────
+// ─── INIT ─────────────────────────────────────────────────
 load();
 currentWeek = getCurrentWeek();
 renderWeek();
