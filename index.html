@@ -4,8 +4,8 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Acarreos Holi Cup</title>
-<script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js" crossorigin></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js" crossorigin></script>
 </head>
 <body style="margin:0;background:#0a0a0a">
 <div id="root"></div>
@@ -220,6 +220,7 @@ e('div',{key:di,style:{background:pts>0?"rgba(200,168,75,0.15)":"rgba(255,255,25
 e('div',{style:{fontSize:"10px",color:"#888"}},`F${di+1}${fechas[di]?.es_playoff?" ⚔️":""}`),
 e('div',{style:{fontSize:"20px",fontWeight:"bold",color:fechas[di]?.es_playoff?"#a87fe8":pts>0?"#c8a84b":"#555"}},pts>0?pts:"—"),
 player.wins[di]>0 ? e('div',{style:{fontSize:"10px",color:"#4bc87a"}},"🏆") : null
+)
 )
 )
 ) : null
