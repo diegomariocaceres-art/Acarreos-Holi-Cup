@@ -4,8 +4,8 @@
  <meta charset="UTF-8"/>
  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
  <title>Holi Robin</title>
- <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js" crossorigin></script>
- <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js" crossorigin></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" crossorigin></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js" crossorigin></script>
 </head>
 <body style="margin:0;background:#0a0a0a">
 <div id="root"></div>
@@ -13,144 +13,250 @@
 const { useState } = React;
 const e = React.createElement;
 
+// ── CAMPOS ──────────────────────────────────────────────────────────────────
+// Rating/slope de TheGrint (Oct 2026), solo tees de hombres.
+// pars + hcp = tarjeta hoyo por hoyo. Los campos sin tarjeta piden llenarla en la app
+// (boton "Editar tarjeta"); se guarda en el telefono.
 const COURSES = {
  "Miami Beach": {
-   par: 72,
-   hcp: [3,15,11,1,9,17,13,5,7,6,2,10,4,16,14,12,18,8],
-   tees: {
-     "Black":      { rating:74.2, slope:138 },
-     "Blue":       { rating:72.0, slope:134 },
-     "Blue/White": { rating:70.7, slope:130 },
-     "White":      { rating:69.4, slope:126 },
+   pars:[5,4,3,4,5,3,4,4,3,5,4,5,4,3,5,4,3,4],
+   hcp:[3,15,11,1,9,17,13,5,7,6,2,10,4,16,14,12,18,8],
+   tees:{
+     "Black":{rating:74.1,slope:142},
+     "Black/Blue":{rating:72.9,slope:140},
+     "Blue":{rating:72.2,slope:138},
+     "White/Blue":{rating:71.2,slope:136},
+     "White":{rating:70.1,slope:133},
+     "White/Yellow":{rating:69.1,slope:130},
+     "Yellow":{rating:68.0,slope:125},
+     "Yellow/Red":{rating:66.1,slope:122},
+     "Red":{rating:64.8,slope:118},
    }
  },
  "Normandy Shores": {
-   par: 71,
-   hcp: [9,5,11,1,15,13,3,17,7,6,2,14,10,18,12,4,16,8],
-   tees: {
-     "Blue":       { rating:73.0, slope:131 },
-     "Blue/White": { rating:72.3, slope:126 },
-     "White":      { rating:71.8, slope:124 },
-     "Gold":       { rating:68.8, slope:119 },
+   pars:[4,4,5,4,3,4,4,3,4,4,4,4,4,3,4,5,3,5],
+   hcp:[9,5,11,1,15,13,3,17,7,6,2,14,10,18,12,4,16,8],
+   tees:{
+     "Blue":{rating:73.0,slope:131},
+     "White/Blue":{rating:72.3,slope:126},
+     "White":{rating:71.8,slope:124},
+     "Gold/White":{rating:69.9,slope:121},
+     "Gold":{rating:68.8,slope:119},
+     "Red/Gold":{rating:66.1,slope:109},
+     "Red":{rating:64.7,slope:106},
    }
  },
  "Miami Shores": {
-   par: 71,
-   hcp: [5,15,11,9,3,7,1,13,17,18,16,14,12,6,2,4,10,8],
-   tees: {
-     "Blue":       { rating:71.5, slope:124 },
-     "Blue/White": { rating:70.5, slope:122 },
-     "White":      { rating:69.5, slope:121 },
-     "Gold":       { rating:67.3, slope:119 },
+   pars:[5,3,4,4,4,4,5,3,3,4,4,4,5,4,4,4,3,4],
+   hcp:[5,15,11,9,3,7,1,13,17,18,16,14,12,6,2,4,10,8],
+   tees:{
+     "Blue":{rating:71.5,slope:124},
+     "White":{rating:69.5,slope:121},
+     "Gold":{rating:67.3,slope:119},
+     "Red":{rating:63.6,slope:114},
    }
  },
  "Miami Lakes": {
-   par: 72,
-   hcp: [3,13,15,1,7,9,17,11,5,12,4,8,16,2,14,10,18,6],
-   tees: {
-     "Black":       { rating:72.5, slope:128 },
-     "Black/White": { rating:71.4, slope:127 },
-     "White":       { rating:70.3, slope:121 },
-     "Green":       { rating:66.2, slope:113 },
-   }
- },
- "Turnberry Soffer": {
-   par: 70,
-   hcp: [11,9,15,7,1,5,3,17,13,12,10,14,8,4,16,2,18,6],
-   tees: {
-     "Black":      { rating:72.2, slope:138 },
-     "Blue":       { rating:70.3, slope:131 },
-     "Blue/White": { rating:69.6, slope:129 },
-     "White":      { rating:68.1, slope:121 },
-   }
- },
- "Biltmore": {
-   par: 71,
-   hcp: [16,12,10,18,4,6,2,8,14,5,7,11,3,17,9,13,1,15],
-   tees: {
-     "Black":      { rating:74.3, slope:132 },
-     "Blue":       { rating:71.2, slope:126 },
-     "Blue/White": { rating:70.2, slope:124 },
-     "White":      { rating:69.2, slope:122 },
-   }
- },
- "Crandon": {
-   par: 72,
-   hcp: [8,2,12,6,14,16,4,18,10,5,1,9,7,11,3,17,15,13],
-   tees: {
-     "Black":      { rating:75.1, slope:146 },
-     "Blue":       { rating:73.7, slope:142 },
-     "Blue/White": { rating:72.8, slope:139 },
-     "White":      { rating:71.8, slope:135 },
-     "Green":      { rating:69.0, slope:126 },
-   }
- },
- // ── NUEVOS CAMPOS ────────────────────────────────────────────────────────
- // Trump Doral Miami = Blue Monster (par 72)
- "Trump Doral Miami": {
-   par: 72,
-   hcp: [5,17,3,13,15,7,1,9,11,4,16,8,10,6,18,14,12,2],
-   tees: {
-     "Black":      { rating:77.4, slope:146 },
-     "Gold":       { rating:75.0, slope:140 },
-     "Blue":       { rating:73.5, slope:139 },
-     "White":      { rating:71.7, slope:139 },
-   }
- },
- "Turnberry Miller": {
-   par: 70,
-   hcp: [11,9,13,7,3,15,1,17,5,12,10,16,8,2,6,4,18,14],
-   tees: {
-     "Black":      { rating:71.5, slope:140 },
-     "Blue":       { rating:69.3, slope:132 },
-     "White":      { rating:66.4, slope:121 },
-     "Silver":     { rating:67.0, slope:115 },
-     "Red":        { rating:64.7, slope:110 },
+   pars:[4,4,3,4,5,4,3,4,5,4,4,5,3,4,4,5,3,4],
+   hcp:[3,13,15,1,7,9,17,11,5,12,4,8,16,2,14,10,18,6],
+   tees:{
+     "Black":{rating:74.1,slope:136},
+     "Black/White":{rating:71.4,slope:127},
+     "White":{rating:70.3,slope:121},
+     "White/Green":{rating:68.3,slope:117},
+     "Green":{rating:66.2,slope:113},
    }
  },
  "Miami Springs": {
-   par: 71,
-   hcp: [10,14,4,12,18,16,2,8,6,7,3,5,13,9,15,17,1,11],
-   tees: {
-     "Blue":       { rating:71.8, slope:122 },
-     "White":      { rating:70.7, slope:120 },
-     "Gold":       { rating:67.6, slope:113 },
-     "Red":        { rating:66.1, slope:111 },
+   pars:[4,4,4,3,5,4,4,3,4,4,4,3,5,4,5,3,4,4],
+   hcp:[10,14,4,12,18,16,2,8,6,7,3,5,13,9,15,17,1,11],
+   tees:{
+     "Blue":{rating:71.8,slope:122},
+     "White":{rating:70.7,slope:120},
+     "Gold":{rating:67.6,slope:113},
+     "Red":{rating:66.1,slope:111},
    }
  },
- // The Park = The Park West Palm (Gil Hanse, par 71)
+ "Biltmore": {
+   pars:[5,3,4,4,4,4,4,3,4,4,4,3,4,3,5,4,4,5],
+   hcp:[16,12,10,18,4,6,2,8,14,5,7,11,3,17,9,13,1,15],
+   tees:{
+     "Black":{rating:74.3,slope:132},
+     "Ross":{rating:72.6,slope:128},
+     "Blue":{rating:71.2,slope:126},
+     "Members":{rating:70.0,slope:124},
+     "White":{rating:69.2,slope:122},
+     "Red":{rating:65.6,slope:116},
+   }
+ },
+ "Crandon": {
+   pars:[5,4,3,5,4,3,4,3,4,5,4,3,4,5,4,4,3,5],
+   hcp:[8,6,12,4,10,16,2,18,14,5,1,9,7,11,3,17,15,13],
+   tees:{
+     "Black":{rating:75.1,slope:146},
+     "Blue":{rating:73.7,slope:142},
+     "White":{rating:71.8,slope:135},
+     "Green":{rating:69.0,slope:126},
+     "Gold":{rating:67.0,slope:122},
+   }
+ },
+ "Granada": {
+   pars:[4,4,3,5,3,5,3,4,5,4,4,3,5,3,5,3,4,5],
+   hcp:[3,9,5,15,11,1,17,7,13,4,10,6,16,12,2,18,8,14],
+   tees:{
+     "Blue":{rating:69.6,slope:116},
+     "White":{rating:66.0,slope:110},
+     "Red":{rating:61.6,slope:95},
+   }
+ },
+ // ── Turnberry (2 campos) ──
+ "Turnberry Soffer": {
+   pars:[4,5,3,4,4,5,3,4,4,4,5,4,3,4,3,4,3,4],
+   hcp:[13,5,17,1,3,7,15,11,9,4,12,6,18,8,10,14,16,2],
+   tees:{
+     "Black":{rating:72.2,slope:138},
+     "Blue":{rating:70.3,slope:131},
+     "Blue/White":{rating:69.6,slope:129},
+     "White":{rating:68.1,slope:121},
+     "Green":{rating:65.9,slope:117},
+   }
+ },
+ "Turnberry Miller": {
+   pars:[4,4,3,4,5,3,4,3,5,4,3,4,4,5,3,5,3,4],
+   hcp:[11,9,15,3,1,7,5,17,13,14,12,10,6,2,16,4,18,8],
+   tees:{
+     "Black":{rating:69.6,slope:126},
+     "Black/Blue":{rating:68.8,slope:124},
+     "Blue":{rating:67.5,slope:122},
+     "White":{rating:64.9,slope:110},
+     "Green":{rating:63.3,slope:107},
+   }
+ },
+ // ── Trump National Doral (4 campos) ──
+ "Doral Blue Monster": {
+   pars:[5,4,4,3,4,4,4,5,3,5,4,5,3,4,3,4,4,4],
+   hcp:[5,17,3,13,15,7,1,9,11,4,16,8,10,6,18,14,12,2],
+   tees:{
+     "Black":{rating:77.4,slope:146},
+     "Gold":{rating:75.0,slope:140},
+     "Blue":{rating:73.5,slope:139},
+     "White":{rating:71.7,slope:139},
+     "Red":{rating:67.6,slope:132},
+   }
+ },
+ "Doral Golden Palm": {
+   pars:[4,5,4,5,4,4,3,4,3,4,5,3,4,4,3,5,3,4],
+   hcp:[11,7,9,1,3,13,15,5,17,10,2,18,12,4,16,6,14,8],
+   tees:{
+     "Black":{rating:74.2,slope:139},
+     "Gold":{rating:72.0,slope:134},
+     "Blue":{rating:69.9,slope:133},
+     "White":{rating:68.6,slope:128},
+     "Red":{rating:65.1,slope:121},
+   }
+ },
+ "Doral Red Tiger": {
+   pars:[5,3,5,4,5,3,4,3,4,5,3,5,4,3,4,3,4,5],
+   hcp:[3,13,9,5,1,17,7,15,11,4,16,2,12,18,8,10,14,6],
+   tees:{
+     "Black":{rating:71.8,slope:136},
+     "Gold":{rating:69.6,slope:132},
+     "Blue":{rating:68.6,slope:127},
+     "White":{rating:66.2,slope:120},
+     "Red":{rating:63.4,slope:115},
+   }
+ },
+ "Doral Silver Fox": {
+   pars:[4,4,5,3,4,4,3,4,4,4,5,4,4,4,3,5,3,4],
+   hcp:[10,12,14,8,18,2,4,6,16,5,3,1,15,11,13,17,7,9],
+   tees:{
+     "Black":{rating:74.9,slope:148},
+     "Gold":{rating:72.6,slope:143},
+     "Blue":{rating:69.8,slope:135},
+     "White":{rating:67.6,slope:128},
+     "Red":{rating:63.6,slope:120},
+   }
+ },
+ // ── Miccosukee (3 campos) ──
+ "Micco Dolphin/Marlin": {
+   pars:[5,3,4,4,4,4,5,3,4,5,4,4,3,5,4,4,3,4],
+   hcp:[4,16,6,18,12,8,2,10,14,13,1,15,11,7,3,17,5,9],
+   tees:{
+     "Blue":{rating:74.5,slope:138},
+     "White":{rating:71.9,slope:135},
+     "Gold":{rating:69.4,slope:131},
+     "Green":{rating:66.4,slope:124},
+   }
+ },
+ "Micco Dolphin/Barracuda": {
+   pars:[5,3,4,4,4,4,5,3,4,4,4,3,5,4,3,5,4,4],
+   hcp:[4,16,6,18,12,8,2,10,14,5,9,17,1,11,15,3,13,7],
+   tees:{
+     "Blue":{rating:73.4,slope:139},
+     "White":{rating:71.4,slope:133},
+     "Gold":{rating:68.6,slope:127},
+     "Green":{rating:66.3,slope:121},
+   }
+ },
+ "Micco Marlin/Barracuda": {
+   pars:[5,4,4,3,5,4,4,3,4,4,4,3,5,4,3,5,4,4],
+   hcp:[13,1,15,11,7,3,17,5,9,6,10,18,2,12,16,4,14,8],
+   tees:{
+     "Blue":{rating:73.5,slope:136},
+     "White":{rating:71.3,slope:130},
+     "Gold":{rating:69.2,slope:126},
+     "Green":{rating:67.1,slope:122},
+   }
+ },
+ // The Park West Palm (verificado con TheGrint)
  "The Park": {
-   par: 71,
-   hcp: [13,9,17,3,7,11,15,1,5,10,14,4,8,2,12,18,16,6],
-   tees: {
-     "Yellow":     { rating:74.2, slope:139 },
-     "Black":      { rating:71.9, slope:134 },
-     "Light Blue": { rating:69.1, slope:127 },
-     "Sand":       { rating:66.7, slope:122 },
-     "Green":      { rating:62.9, slope:110 },
+   pars:[5,4,3,4,3,4,3,4,5,4,3,4,4,4,5,4,3,5],
+   hcp:[13,9,17,3,7,11,15,1,5,10,14,4,8,2,12,18,16,6],
+   tees:{
+     "Yellow":{rating:74.2,slope:139},
+     "Black":{rating:71.9,slope:134},
+     "Light Blue":{rating:69.1,slope:127},
+     "Sand":{rating:66.7,slope:122},
+     "Green":{rating:62.9,slope:110},
    }
  },
-};
-
-const HOLE_PARS = {
- "Miami Beach":      [5,4,3,4,5,3,4,4,3,5,4,5,4,3,5,4,3,4],
- "Normandy Shores":  [4,4,5,4,3,4,4,3,4,4,4,4,4,3,4,5,3,5],
- "Miami Shores":     [5,3,4,4,4,4,5,3,3,4,4,4,5,4,4,4,3,4],
- "Miami Lakes":      [4,4,3,4,5,4,3,4,5,4,4,5,3,4,4,5,3,4],
- "Turnberry Soffer": [4,4,3,4,5,3,4,3,5,4,3,4,4,5,3,5,3,4],
- "Biltmore":         [5,3,4,4,4,4,4,3,4,4,4,3,4,3,5,4,4,5],
- "Crandon":          [5,4,3,5,4,3,4,3,4,5,4,3,4,5,4,4,3,5],
- // nuevos
- "Trump Doral Miami":[5,4,4,3,4,4,4,5,3,5,4,5,3,4,3,4,4,4],
- "Turnberry Miller": [4,3,4,4,5,3,5,3,4,4,4,3,4,5,3,4,3,5],
- "Miami Springs":    [4,4,4,3,5,4,4,3,4,4,4,3,5,4,5,3,4,4],
- "The Park":         [5,4,3,4,3,4,3,4,5,4,3,4,4,4,5,4,3,5],
 };
 
 const GOLD="#c8a84b", GREEN="#4bc87a", RED="#e87f7f", PURPLE="#a87fe8";
 const BG="#0a0f1e", CARD="rgba(255,255,255,0.04)", BORDER="rgba(200,168,75,0.2)";
 // Puntos que vale un birdie (igual que el sandy). Cambia este numero si quieres otro valor.
 const BIRDIE_PTS = 1;
+
+const TEE_BASE={"Black":"#888","Blue":"#4a8fd4","White":"#e8dcc8","Gold":"#c8a84b","Green":"#4bc87a","Yellow":"#e8d34b","Red":"#e87f7f","Silver":"#b8b8b8","Sand":"#d8c29a","Rock":"#b0a090","Ross":"#8a9ab8","Members":"#7ab8e8","Light Blue":"#8fd0f0"};
+function teeColor(t){
+ if(TEE_BASE[t]) return TEE_BASE[t];
+ var f=t.split("/")[0];
+ return TEE_BASE[f]||GOLD;
+}
+
+// ── TARJETAS GUARDADAS EN EL TELEFONO ───────────────────────────────────────
+var CARDS_KEY="holiRobinCards_v1";
+function loadCards(){try{var r=localStorage.getItem(CARDS_KEY);return r?JSON.parse(r):{};}catch(err){return {};}}
+function saveCards(c){try{localStorage.setItem(CARDS_KEY,JSON.stringify(c));}catch(err){}}
+function seq18(){var a=[];for(var i=1;i<=18;i++)a.push(i);return a;}
+function cardErrors(c){
+ var errs=[];
+ if(!c||!c.pars||!c.hcp) return ["Tarjeta vacía"];
+ if(c.pars.some(function(p){return !(p>=3&&p<=6);})) errs.push("Falta el par (3 a 6) en algún hoyo");
+ var seen={},dup=[],miss=[];
+ c.hcp.forEach(function(h){if(h){if(seen[h]) dup.push(h); seen[h]=1;}});
+ for(var i=1;i<=18;i++) if(!seen[i]) miss.push(i);
+ if(dup.length) errs.push("HCP repetido: "+dup.join(", "));
+ if(miss.length) errs.push("Falta HCP: "+miss.join(", "));
+ return errs;
+}
+function getCard(name,cards){
+ var saved=cards[name];
+ if(saved&&cardErrors(saved).length===0) return {pars:saved.pars,hcp:saved.hcp,ready:true,custom:true};
+ var b=COURSES[name];
+ if(b.pars&&b.hcp) return {pars:b.pars,hcp:b.hcp,ready:true,custom:false};
+ return {pars:Array(18).fill(4),hcp:seq18(),ready:false,custom:false};
+}
 
 function HoliLogo() {
  return e('div',{style:{width:70,height:70,borderRadius:"50%",
@@ -213,8 +319,21 @@ function App(){
  var currentHoyo_=s(0); var currentHoyo=currentHoyo_[0]; var setCurrentHoyo=currentHoyo_[1];
  var showMult_=s(false); var showMultiplier=showMult_[0]; var setShowMultiplier=showMult_[1];
  var fromSummary_=s(false); var fromSummary=fromSummary_[0]; var setFromSummary=fromSummary_[1];
+ var cards_=s(loadCards); var cards=cards_[0]; var setCards=cards_[1];
+ var showCard_=s(false); var showCard=showCard_[0]; var setShowCard=showCard_[1];
+ var draft_=s(null); var draft=draft_[0]; var setDraft=draft_[1];
 
- var cd=COURSES[course];
+ var cardInfo=getCard(course,cards);
+ var cd={
+   tees:COURSES[course].tees,
+   hcp:cardInfo.hcp,
+   pars:cardInfo.pars,
+   par:cardInfo.pars.reduce(function(a,b){return a+b;},0),
+   ready:cardInfo.ready
+ };
+ var roundStarted=greenOrderSet;
+ var anyScores=hoyos.some(function(h){return h.scores.some(function(v){return v!==null;});});
+
  var courseHcps=players.map(function(p){var td=cd.tees[p.tee];return td?calcCourseHcp(p.hcpIndex,td.slope,td.rating,cd.par):Math.round(p.hcpIndex);});
  var t1Combo=[[greenOrder[0],greenOrder[2]],[greenOrder[1],greenOrder[3]]];
  var t3Combo=[carts[0],carts[1]];
@@ -223,7 +342,10 @@ function App(){
 
  // Al cambiar de campo, si el tee de un jugador no existe en ese campo, usa el primero disponible
  function changeCourse(c){
+   if(c===course) return;
+   if(anyScores&&!window.confirm("Ya hay scores anotados. ¿Cambiar de campo? Los golpes y resultados se recalculan con la tarjeta nueva.")) return;
    setCourse(c);
+   setShowCard(false);
    var newTees=Object.keys(COURSES[c].tees);
    setPlayers(function(prev){
      return prev.map(function(p){
@@ -232,13 +354,51 @@ function App(){
    });
  }
 
+ // ── Editor de tarjeta ──
+ function openCard(){
+   setDraft({
+     pars:cd.ready?cd.pars.slice():Array(18).fill(null),
+     hcp:cd.ready?cd.hcp.slice():Array(18).fill(null)
+   });
+   setShowCard(true);
+ }
+ function updateDraft(field,i,val){
+   setDraft(function(prev){
+     var n={pars:prev.pars.slice(),hcp:prev.hcp.slice()};
+     n[field][i]=val===""?null:parseInt(val);
+     return n;
+   });
+ }
+ function saveDraft(){
+   var n=Object.assign({},cards);
+   n[course]={pars:draft.pars.slice(),hcp:draft.hcp.slice()};
+   setCards(n); saveCards(n); setShowCard(false);
+ }
+ function restoreOriginal(){
+   var n=Object.assign({},cards);
+   delete n[course];
+   setCards(n); saveCards(n); setShowCard(false);
+ }
+
+ function resetRound(){
+   setCurrentHoyo(0);setShowMultiplier(false);
+   setGreenOrderSet(false);setFromSummary(false);
+   setHoyos(Array.from({length:18},emptyHoyo));
+ }
+
+ function goSetup(){
+   setShowMultiplier(false);
+   setFromSummary(false);
+   setScreen("setup");
+ }
+
  function getPairs(t){return terciosCombos[t];}
 
  function calcRaw(h,hi){
    var tercio=Math.floor(hi/6);
    var pairs=getPairs(tercio);
    var holeHcpIdx=cd.hcp[hi];
-   var holePar=(HOLE_PARS[course]||[])[hi]||4;
+   var holePar=cd.pars[hi]||4;
    var nets=h.scores.map(function(s,i){return s!==null?netOnHole(s,courseHcps[i],holeHcpIdx):null;});
    if(nets.some(function(n){return n===null;})) return null;
    var allPutts=h.putts.every(function(p){return p!==null;});
@@ -288,7 +448,7 @@ function App(){
    return {pair1:pairs[0],pair2:pairs[1],total:total,lastPts:lastPts,multiplier:mult,dolares:dolares,winner:total>0?pairs[0]:total<0?pairs[1]:null};
  }
 
- // FIX: removed /2 — each player gets/pays the full tercio value
+ // Cada jugador gana/paga el valor completo del tercio
  function calcBalance(){
    var bal=[0,0,0,0];
    for(var t=0;t<3;t++){
@@ -305,13 +465,12 @@ function App(){
  // Totales gross / neto por jugador (solo hoyos donde el jugador tiene score)
  function calcPlayerTotals(pi){
    var gross=0,net=0,played=0,parSum=0;
-   var pars=HOLE_PARS[course]||[];
    for(var hi=0;hi<18;hi++){
      var sc=hoyos[hi].scores[pi];
      if(sc!==null){
        gross+=sc;
        net+=netOnHole(sc,courseHcps[pi],cd.hcp[hi]);
-       parSum+=pars[hi]||4;
+       parSum+=cd.pars[hi]||4;
        played++;
      }
    }
@@ -357,7 +516,7 @@ function App(){
  var pairsNow=getPairs(tercio);
  var holeHcpIdx=cd.hcp[currentHoyo];
  var currentH=hoyos[currentHoyo];
- var holePar=(HOLE_PARS[course]||[])[currentHoyo]||4;
+ var holePar=cd.pars[currentHoyo]||4;
  var running1=runningScore(tercio,currentHoyo);
  var holeResult=calcEffective(currentH,currentHoyo);
 
@@ -368,8 +527,43 @@ function App(){
    if(currentHoyo<17) setCurrentHoyo(function(h){return h+1;}); else setScreen("summary");
  }
 
- var teeColors={"Black":"#888","Blue":"#4a8fd4","White":"#e8dcc8","Blue/White":"#7ab8e8","Black/White":"#999","Gold":"#c8a84b","Green":"#4bc87a","Yellow":"#e8d34b","Light Blue":"#8fd0f0","Sand":"#d8c29a","Silver":"#b8b8b8","Red":"#e87f7f"};
  var toggleRgb={"#4bc87a":"75,200,120","#a87fe8":"168,127,232","#c8a84b":"200,168,75"};
+ var smallInput={width:"100%",padding:"5px 0",borderRadius:6,background:"rgba(0,0,0,0.4)",border:"1px solid "+BORDER,color:GOLD,fontSize:13,textAlign:"center",fontFamily:"inherit",boxSizing:"border-box"};
+ var ghostBtn={padding:"6px 12px",borderRadius:8,fontSize:11,cursor:"pointer",fontFamily:"inherit",background:CARD,border:"1px solid "+BORDER,color:GOLD};
+
+ // ── Editor de tarjeta (UI) ──
+ function cardEditor(){
+   if(!showCard||!draft) return null;
+   var errs=cardErrors(draft);
+   var parSum=draft.pars.reduce(function(a,b){return a+(b||0);},0);
+   return e('div',{style:{marginTop:10}},
+     [0,1].map(function(half){
+       var idxs=[0,1,2,3,4,5,6,7,8].map(function(k){return half*9+k;});
+       var grid={display:"grid",gridTemplateColumns:"34px repeat(9,1fr)",gap:3,alignItems:"center",marginBottom:3};
+       return e('div',{key:half,style:{marginBottom:8}},
+         e('div',{style:grid},
+           e('div',{style:{fontSize:10,color:"#667"}},"Hoyo"),
+           idxs.map(function(i){return e('div',{key:i,style:{fontSize:10,color:"#aaa",textAlign:"center"}},i+1);})
+         ),
+         e('div',{style:grid},
+           e('div',{style:{fontSize:10,color:"#667"}},"Par"),
+           idxs.map(function(i){return e('input',{key:i,type:"number",inputMode:"numeric",min:"3",max:"6",value:draft.pars[i]!==null?draft.pars[i]:"",onChange:function(ev){updateDraft("pars",i,ev.target.value);},style:smallInput});})
+         ),
+         e('div',{style:grid},
+           e('div',{style:{fontSize:10,color:"#667"}},"HCP"),
+           idxs.map(function(i){return e('input',{key:i,type:"number",inputMode:"numeric",min:"1",max:"18",value:draft.hcp[i]!==null?draft.hcp[i]:"",onChange:function(ev){updateDraft("hcp",i,ev.target.value);},style:Object.assign({},smallInput,{color:PURPLE})});})
+         )
+       );
+     }),
+     e('div',{style:{fontSize:11,color:"#aaa",marginBottom:6}},"Par total: "+parSum),
+     errs.length?e('div',{style:{fontSize:11,color:RED,marginBottom:8}},errs.join(" · ")):null,
+     e('div',{style:{display:"flex",gap:8,flexWrap:"wrap"}},
+       e('button',{disabled:errs.length>0,onClick:saveDraft,style:Object.assign({},ghostBtn,{background:errs.length?CARD:"rgba(200,168,75,0.2)",color:errs.length?"#555":GOLD,cursor:errs.length?"not-allowed":"pointer"})},"💾 Guardar tarjeta"),
+       cardInfo.custom&&COURSES[course].pars?e('button',{onClick:restoreOriginal,style:ghostBtn},"Restaurar original"):null,
+       e('button',{onClick:function(){setShowCard(false);},style:Object.assign({},ghostBtn,{color:"#888"})},"Cancelar")
+     )
+   );
+ }
 
  // ── SETUP ─────────────────────────────────────────────────────────────────
  if(screen==="setup") return e('div',{style:{minHeight:"100vh",background:"linear-gradient(160deg,"+BG+" 0%,#0d2137 60%,#1a0a0a 100%)",fontFamily:"Georgia,serif",color:"#e8dcc8",padding:20}},
@@ -379,13 +573,27 @@ function App(){
      e('h1',{style:{margin:"2px 0",fontSize:36,fontWeight:900,color:"#fff",letterSpacing:3}},"ROBIN"),
      e('div',{style:{fontSize:11,color:"#667",letterSpacing:3}},"4SOMES · STROKE NETO")
    ),
+   roundStarted?e('div',{style:{marginBottom:14,padding:"10px 12px",background:"rgba(75,200,120,0.08)",border:"1px solid "+GREEN,borderRadius:12,fontSize:12,color:GREEN,lineHeight:1.5}},
+     "Ronda en curso. Puedes cambiar tees, índices, nombres, apuesta o carritos: los scores se mantienen y todo se recalcula."
+   ):null,
    e('div',{style:{marginBottom:14}},
      e('div',{style:{fontSize:11,color:GOLD,letterSpacing:2,marginBottom:8}},"CAMPO"),
      e('div',{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}},
        Object.keys(COURSES).map(function(c){
-         return e('button',{key:c,onClick:function(){changeCourse(c);},style:{padding:"9px 6px",borderRadius:10,cursor:"pointer",fontFamily:"inherit",fontSize:11,background:course===c?"rgba(200,168,75,0.2)":CARD,border:"1px solid "+(course===c?GOLD:BORDER),color:course===c?GOLD:"#aaa",fontWeight:course===c?"bold":"normal"}},c);
+         var ok=getCard(c,cards).ready;
+         return e('button',{key:c,onClick:function(){changeCourse(c);},style:{padding:"9px 6px",borderRadius:10,cursor:"pointer",fontFamily:"inherit",fontSize:11,background:course===c?"rgba(200,168,75,0.2)":CARD,border:"1px solid "+(course===c?GOLD:BORDER),color:course===c?GOLD:"#aaa",fontWeight:course===c?"bold":"normal"}},c+(ok?"":" ⚠️"));
        })
      )
+   ),
+   e('div',{style:{marginBottom:14,padding:"10px 12px",background:cd.ready?CARD:"rgba(232,127,127,0.08)",borderRadius:12,border:"1px solid "+(cd.ready?BORDER:RED)}},
+     e('div',{style:{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}},
+       e('div',{style:{fontSize:12,color:cd.ready?"#aaa":RED}},
+         cd.ready?"📋 Tarjeta · Par "+cd.par+(cardInfo.custom?" · editada":""):"⚠️ Falta la tarjeta de este campo"
+       ),
+       e('button',{onClick:function(){showCard?setShowCard(false):openCard();},style:ghostBtn},showCard?"Cerrar":"✏️ Editar tarjeta")
+     ),
+     !cd.ready&&!showCard?e('div',{style:{fontSize:11,color:"#aaa",marginTop:6,lineHeight:1.5}},"Ingresa el par y el HCP de cada hoyo (salen en el scorecard). Se guarda en este teléfono."):null,
+     cardEditor()
    ),
    e('div',{style:{marginBottom:14,padding:"12px 14px",background:CARD,borderRadius:12,border:"1px solid "+BORDER}},
      e('div',{style:{fontSize:11,color:GOLD,letterSpacing:2,marginBottom:10}},"💰 APUESTA"),
@@ -420,7 +628,7 @@ function App(){
              return e('button',{key:t,onClick:function(){setPlayers(function(prev){var n=prev.slice();n[i]=Object.assign({},n[i],{tee:t});return n;});},style:{padding:"4px 10px",borderRadius:6,fontSize:11,cursor:"pointer",fontFamily:"inherit",background:p.tee===t?"rgba(200,168,75,0.2)":CARD,border:"1px solid "+(p.tee===t?GOLD:BORDER),color:p.tee===t?GOLD:"#888"}},t);
            })
          ),
-         e('div',{style:{fontSize:10,color:"#667"}},td?"Rating "+td.rating+" · Slope "+td.slope+" → "+ch+" golpes":"")
+         e('div',{style:{fontSize:10,color:"#667"}},td?"Rating "+td.rating+" · Slope "+td.slope+" · Par "+cd.par+" → "+ch+" golpes":"")
        );
      })
    ),
@@ -451,12 +659,18 @@ function App(){
        })
      )
    ),
-   e('button',{onClick:function(){setScreen(greenOrderSet?"game":"greenorder");},style:{width:"100%",padding:16,background:"linear-gradient(135deg,#1a5c1a,#0d3a20)",border:"2px solid "+GOLD,borderRadius:12,color:GOLD,fontSize:16,fontWeight:"bold",letterSpacing:2,cursor:"pointer",fontFamily:"inherit"}},"⛳ EMPEZAR RONDA")
+   e('button',{disabled:!cd.ready,onClick:function(){if(!cd.ready) return; setScreen(roundStarted?"game":"greenorder");},style:{width:"100%",padding:16,background:cd.ready?"linear-gradient(135deg,#1a5c1a,#0d3a20)":"rgba(232,127,127,0.08)",border:"2px solid "+(cd.ready?GOLD:RED),borderRadius:12,color:cd.ready?GOLD:RED,fontSize:16,fontWeight:"bold",letterSpacing:2,cursor:cd.ready?"pointer":"not-allowed",fontFamily:"inherit"}},
+     !cd.ready?"⚠️ LLENA LA TARJETA PRIMERO":roundStarted?"↩ VOLVER A LA RONDA":"⛳ EMPEZAR RONDA"),
+   roundStarted?e('div',{style:{display:"flex",gap:8,marginTop:10}},
+     e('button',{onClick:function(){setScreen("greenorder");},style:Object.assign({},ghostBtn,{flex:1,padding:"10px"})},"🔀 Cambiar orden al green"),
+     e('button',{onClick:function(){if(window.confirm("¿Borrar todos los scores y empezar de cero?")) resetRound();},style:Object.assign({},ghostBtn,{flex:1,padding:"10px",color:RED,border:"1px solid rgba(232,127,127,0.4)"})},"🗑 Reiniciar ronda")
+   ):null
  );
 
  // ── GREEN ORDER ────────────────────────────────────────────────────────────
  if(screen==="greenorder") return e('div',{style:{minHeight:"100vh",background:"linear-gradient(160deg,"+BG+",#0d2137)",fontFamily:"Georgia,serif",color:"#e8dcc8",padding:20}},
-   e('div',{style:{textAlign:"center",paddingTop:36,paddingBottom:20}},
+   e('button',{onClick:goSetup,style:Object.assign({},ghostBtn,{marginTop:8})},"← Setup"),
+   e('div',{style:{textAlign:"center",paddingTop:20,paddingBottom:20}},
      e(HoliLogo,null),
      e('div',{style:{fontSize:16,fontWeight:"bold",color:GOLD,marginTop:10,marginBottom:6}},"HOYO 1 — ORDEN AL GREEN"),
      e('div',{style:{fontSize:12,color:"#778",lineHeight:1.8}},"1° y 3° = Pareja A · 2° y 4° = Pareja B")
@@ -498,12 +712,16 @@ function App(){
        );
      })
    ),
-   e('button',{onClick:function(){setGreenOrderSet(true);setScreen("game");},style:{width:"100%",padding:16,background:"linear-gradient(135deg,#c8a84b,#a8882b)",border:"none",borderRadius:12,color:"#000",fontSize:16,fontWeight:"bold",letterSpacing:2,cursor:"pointer",fontFamily:"inherit"}},"CONFIRMAR Y JUGAR ⛳")
+   e('button',{onClick:function(){setGreenOrderSet(true);setScreen("game");},style:{width:"100%",padding:16,background:"linear-gradient(135deg,#c8a84b,#a8882b)",border:"none",borderRadius:12,color:"#000",fontSize:16,fontWeight:"bold",letterSpacing:2,cursor:"pointer",fontFamily:"inherit"}},roundStarted?"GUARDAR Y VOLVER ⛳":"CONFIRMAR Y JUGAR ⛳")
  );
 
  // ── GAME ──────────────────────────────────────────────────────────────────
  if(screen==="game") return e('div',{style:{minHeight:"100vh",background:"linear-gradient(160deg,"+BG+",#0d2137)",fontFamily:"Georgia,serif",color:"#e8dcc8"}},
    e('div',{style:{background:"rgba(0,0,0,0.5)",borderBottom:"1px solid "+BORDER,padding:"12px 16px"}},
+     e('div',{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}},
+       e('button',{onClick:goSetup,style:ghostBtn},"⚙️ Editar setup"),
+       e('div',{style:{fontSize:10,color:"#667"}},course)
+     ),
      e('div',{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}},
        e('div',null,
          e('div',{style:{fontSize:10,color:"#667",letterSpacing:2}},"HOYO"),
@@ -572,7 +790,7 @@ function App(){
        ),
        players.map(function(p,i){
          var net=currentH.scores[i]!==null?netOnHole(currentH.scores[i],courseHcps[i],holeHcpIdx):null;
-         var tc=teeColors[p.tee]||GOLD;
+         var tc=teeColor(p.tee);
          return e('div',{key:i,style:{display:"grid",gridTemplateColumns:"1fr 64px 56px",gap:"4px 8px",alignItems:"center",marginBottom:8,padding:"10px 12px",background:CARD,borderRadius:10,border:"1px solid "+BORDER}},
            e('div',null,
              e('div',{style:{display:"flex",alignItems:"center",gap:6}},
@@ -767,10 +985,10 @@ function App(){
          );
        })
      ),
+     e('button',{onClick:goSetup,style:{width:"100%",padding:14,marginBottom:10,background:CARD,border:"1px solid "+GOLD,borderRadius:12,color:GOLD,fontSize:14,letterSpacing:1,cursor:"pointer",fontFamily:"inherit"}},"⚙️ Editar setup (tees, índices, apuesta)"),
      e('button',{onClick:function(){
-       setScreen("setup");setCurrentHoyo(0);setShowMultiplier(false);
-       setGreenOrderSet(false);setFromSummary(false);
-       setHoyos(Array.from({length:18},emptyHoyo));
+       if(!window.confirm("¿Empezar una ronda nueva? Se borran los scores.")) return;
+       resetRound(); setScreen("setup");
      },style:{width:"100%",padding:16,background:CARD,border:"2px dashed "+GOLD,borderRadius:12,color:GOLD,fontSize:14,letterSpacing:2,cursor:"pointer",fontFamily:"inherit"}},"🔄 Nueva Ronda")
    );
  }
