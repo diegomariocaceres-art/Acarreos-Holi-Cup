@@ -266,6 +266,7 @@ function HoliLogo() {
    boxShadow:"0 0 20px rgba(200,168,75,0.3)"}},"🍷");
 }
 
+function idxOf(p){var v=parseFloat(p.hcpIndex);return isNaN(v)?0:v;}
 function calcCourseHcp(index,slope,rating,par){
  return Math.round(index*(slope/113)+(rating-par));
 }
@@ -304,13 +305,13 @@ function App(){
  var s=useState;
  var screen_=s("setup"); var screen=screen_[0]; var setScreen=screen_[1];
  var course_=s("Miami Beach"); var course=course_[0]; var setCourse=course_[1];
- var baseValue_=s(5); var baseValue=baseValue_[0]; var setBaseValue=baseValue_[1];
- var pointValue_=s(1); var pointValue=pointValue_[0]; var setPointValue=pointValue_[1];
+ var baseValue_=s("5"); var baseRaw=baseValue_[0]; var setBaseValue=baseValue_[1]; var baseValue=parseInt(baseRaw)||0;
+ var pointValue_=s("1"); var pointRaw=pointValue_[0]; var setPointValue=pointValue_[1]; var pointValue=parseInt(pointRaw)||0;
  var players_=s([
-   {name:"Jugador 1",hcpIndex:12,tee:"Blue"},
-   {name:"Jugador 2",hcpIndex:18,tee:"Blue"},
-   {name:"Jugador 3",hcpIndex:8,tee:"Blue"},
-   {name:"Jugador 4",hcpIndex:22,tee:"White"},
+   {name:"Jugador 1",hcpIndex:"",tee:"Blue"},
+   {name:"Jugador 2",hcpIndex:"",tee:"Blue"},
+   {name:"Jugador 3",hcpIndex:"",tee:"Blue"},
+   {name:"Jugador 4",hcpIndex:"",tee:"White"},
  ]); var players=players_[0]; var setPlayers=players_[1];
  var carts_=s([[0,1],[2,3]]); var carts=carts_[0]; var setCarts=carts_[1];
  var greenOrder_=s([0,1,2,3]); var greenOrder=greenOrder_[0]; var setGreenOrder=greenOrder_[1];
@@ -334,7 +335,8 @@ function App(){
  var roundStarted=greenOrderSet;
  var anyScores=hoyos.some(function(h){return h.scores.some(function(v){return v!==null;});});
 
- var courseHcps=players.map(function(p){var td=cd.tees[p.tee];return td?calcCourseHcp(p.hcpIndex,td.slope,td.rating,cd.par):Math.round(p.hcpIndex);});
+ var courseHcps=players.map(function(p){var td=cd.tees[p.tee];return td?calcCourseHcp(idxOf(p),td.slope,td.rating,cd.par):Math.round(idxOf(p));});
+ var missingIdx=players.some(function(p){return p.hcpIndex===""||isNaN(parseFloat(p.hcpIndex));});
  var t1Combo=[[greenOrder[0],greenOrder[2]],[greenOrder[1],greenOrder[3]]];
  var t3Combo=[carts[0],carts[1]];
  var t2Combo=computeT2(t1Combo,t3Combo);
@@ -600,11 +602,11 @@ function App(){
      e('div',{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}},
        e('div',null,
          e('div',{style:{fontSize:11,color:"#778",marginBottom:6}},"Base por tercio ($)"),
-         e('input',{type:"number",min:"1",value:baseValue,onChange:function(ev){setBaseValue(parseInt(ev.target.value)||1);},style:{width:"100%",padding:"10px",borderRadius:8,background:"rgba(0,0,0,0.4)",border:"1px solid "+BORDER,color:GOLD,fontSize:22,textAlign:"center",fontFamily:"inherit",boxSizing:"border-box"}})
+         e('input',{type:"number",min:"1",value:baseRaw,inputMode:"numeric",onChange:function(ev){setBaseValue(ev.target.value);},style:{width:"100%",padding:"10px",borderRadius:8,background:"rgba(0,0,0,0.4)",border:"1px solid "+BORDER,color:GOLD,fontSize:22,textAlign:"center",fontFamily:"inherit",boxSizing:"border-box"}})
        ),
        e('div',null,
          e('div',{style:{fontSize:11,color:"#778",marginBottom:6}},"Valor por punto ($)"),
-         e('input',{type:"number",min:"1",value:pointValue,onChange:function(ev){setPointValue(parseInt(ev.target.value)||1);},style:{width:"100%",padding:"10px",borderRadius:8,background:"rgba(0,0,0,0.4)",border:"1px solid "+BORDER,color:GOLD,fontSize:22,textAlign:"center",fontFamily:"inherit",boxSizing:"border-box"}})
+         e('input',{type:"number",min:"1",value:pointRaw,inputMode:"numeric",onChange:function(ev){setPointValue(ev.target.value);},style:{width:"100%",padding:"10px",borderRadius:8,background:"rgba(0,0,0,0.4)",border:"1px solid "+BORDER,color:GOLD,fontSize:22,textAlign:"center",fontFamily:"inherit",boxSizing:"border-box"}})
        )
      ),
      e('div',{style:{marginTop:8,fontSize:11,color:"#667",textAlign:"center"}},"Ej: 3 pts × $"+pointValue+" + $"+baseValue+" = $"+(3*pointValue+baseValue))
@@ -613,14 +615,15 @@ function App(){
      e('div',{style:{fontSize:11,color:GOLD,letterSpacing:2,marginBottom:8}},"JUGADORES"),
      players.map(function(p,i){
        var td=cd.tees[p.tee];
-       var ch=td?calcCourseHcp(p.hcpIndex,td.slope,td.rating,cd.par):Math.round(p.hcpIndex);
+       var ch=td?calcCourseHcp(idxOf(p),td.slope,td.rating,cd.par):Math.round(idxOf(p));
+       var hasIdx=!(p.hcpIndex===""||isNaN(parseFloat(p.hcpIndex)));
        return e('div',{key:i,style:{marginBottom:10,padding:"12px",background:CARD,borderRadius:10,border:"1px solid "+BORDER}},
          e('div',{style:{display:"flex",alignItems:"center",gap:8,marginBottom:8}},
            e('div',{style:{width:24,height:24,borderRadius:"50%",background:"rgba(200,168,75,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:GOLD,flexShrink:0}},i+1),
            e('input',{value:p.name,onChange:function(ev){setPlayers(function(prev){var n=prev.slice();n[i]=Object.assign({},n[i],{name:ev.target.value});return n;});},style:{flex:1,background:"transparent",border:"none",borderBottom:"1px solid "+BORDER,color:"#e8dcc8",fontSize:14,padding:"2px 0",fontFamily:"inherit",outline:"none"}}),
            e('div',{style:{display:"flex",alignItems:"center",gap:4,flexShrink:0}},
              e('span',{style:{fontSize:10,color:"#667"}},"IDX"),
-             e('input',{type:"number",min:"0",max:"54",step:"0.1",value:p.hcpIndex,onChange:function(ev){setPlayers(function(prev){var n=prev.slice();n[i]=Object.assign({},n[i],{hcpIndex:parseFloat(ev.target.value)||0});return n;});},style:{width:50,background:"rgba(0,0,0,0.4)",border:"1px solid "+BORDER,borderRadius:6,color:GOLD,fontSize:13,padding:"3px 4px",textAlign:"center",fontFamily:"inherit"}})
+             e('input',{type:"number",min:"0",max:"54",step:"0.1",value:p.hcpIndex,placeholder:"—",inputMode:"decimal",onChange:function(ev){var v=ev.target.value;setPlayers(function(prev){var n=prev.slice();n[i]=Object.assign({},n[i],{hcpIndex:v});return n;});},style:{width:50,background:"rgba(0,0,0,0.4)",border:"1px solid "+BORDER,borderRadius:6,color:GOLD,fontSize:13,padding:"3px 4px",textAlign:"center",fontFamily:"inherit"}})
            )
          ),
          e('div',{style:{display:"flex",gap:6,flexWrap:"wrap",marginBottom:6}},
@@ -628,7 +631,7 @@ function App(){
              return e('button',{key:t,onClick:function(){setPlayers(function(prev){var n=prev.slice();n[i]=Object.assign({},n[i],{tee:t});return n;});},style:{padding:"4px 10px",borderRadius:6,fontSize:11,cursor:"pointer",fontFamily:"inherit",background:p.tee===t?"rgba(200,168,75,0.2)":CARD,border:"1px solid "+(p.tee===t?GOLD:BORDER),color:p.tee===t?GOLD:"#888"}},t);
            })
          ),
-         e('div',{style:{fontSize:10,color:"#667"}},td?"Rating "+td.rating+" · Slope "+td.slope+" · Par "+cd.par+" → "+ch+" golpes":"")
+         e('div',{style:{fontSize:10,color:"#667"}},td?"Rating "+td.rating+" · Slope "+td.slope+" · Par "+cd.par+" → "+(hasIdx?ch+" golpes":"falta el índice"):"")
        );
      })
    ),
@@ -659,8 +662,8 @@ function App(){
        })
      )
    ),
-   e('button',{disabled:!cd.ready,onClick:function(){if(!cd.ready) return; setScreen(roundStarted?"game":"greenorder");},style:{width:"100%",padding:16,background:cd.ready?"linear-gradient(135deg,#1a5c1a,#0d3a20)":"rgba(232,127,127,0.08)",border:"2px solid "+(cd.ready?GOLD:RED),borderRadius:12,color:cd.ready?GOLD:RED,fontSize:16,fontWeight:"bold",letterSpacing:2,cursor:cd.ready?"pointer":"not-allowed",fontFamily:"inherit"}},
-     !cd.ready?"⚠️ LLENA LA TARJETA PRIMERO":roundStarted?"↩ VOLVER A LA RONDA":"⛳ EMPEZAR RONDA"),
+   e('button',{disabled:!cd.ready||missingIdx,onClick:function(){if(!cd.ready||missingIdx) return; setScreen(roundStarted?"game":"greenorder");},style:{width:"100%",padding:16,background:cd.ready&&!missingIdx?"linear-gradient(135deg,#1a5c1a,#0d3a20)":"rgba(232,127,127,0.08)",border:"2px solid "+(cd.ready&&!missingIdx?GOLD:RED),borderRadius:12,color:cd.ready&&!missingIdx?GOLD:RED,fontSize:16,fontWeight:"bold",letterSpacing:2,cursor:cd.ready&&!missingIdx?"pointer":"not-allowed",fontFamily:"inherit"}},
+     !cd.ready?"⚠️ LLENA LA TARJETA PRIMERO":missingIdx?"INGRESA LOS ÍNDICES":roundStarted?"↩ VOLVER A LA RONDA":"⛳ EMPEZAR RONDA"),
    roundStarted?e('div',{style:{display:"flex",gap:8,marginTop:10}},
      e('button',{onClick:function(){setScreen("greenorder");},style:Object.assign({},ghostBtn,{flex:1,padding:"10px"})},"🔀 Cambiar orden al green"),
      e('button',{onClick:function(){if(window.confirm("¿Borrar todos los scores y empezar de cero?")) resetRound();},style:Object.assign({},ghostBtn,{flex:1,padding:"10px",color:RED,border:"1px solid rgba(232,127,127,0.4)"})},"🗑 Reiniciar ronda")
