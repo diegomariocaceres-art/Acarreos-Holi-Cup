@@ -224,6 +224,7 @@ const [fechas, setFechas] = useState([]);
 const [season,setSeason]=useState(2027);
 const [roster,setRoster]=useState(()=>{try{const a=JSON.parse(localStorage.getItem("holiCupPlayers"));return Array.isArray(a)?a:DEFAULT_PLAYERS;}catch(e){return DEFAULT_PLAYERS;}});
 const [newPlayer,setNewPlayer]=useState("");
+const [newNickname,setNewNickname]=useState("");
 const [showRoster,setShowRoster]=useState(false);
 useEffect(()=>{localStorage.setItem("holiCupPlayers",JSON.stringify(roster));},[roster]);
 const seasonOf=f=>{const m=String(f.nombre||"").match(/^(\d{4}) - /);return m?Number(m[1]):2026;};
@@ -260,8 +261,9 @@ const PLAYER_FULL_NAMES={
 "Felipao":"Felipe Ayala",
 "Metralla":"R. Metral"
 };
-const playerDisplayName=(nickname)=>PLAYER_FULL_NAMES[nickname]||nickname;
-const playerSubName=(nickname)=>PLAYER_FULL_NAMES[nickname]&&PLAYER_FULL_NAMES[nickname]!==nickname?nickname:null;
+const seasonPlayerNames=seasonConfig?.resultados?.playerNames||{};
+const playerDisplayName=(nickname)=>seasonPlayerNames[nickname]||PLAYER_FULL_NAMES[nickname]||nickname;
+const playerSubName=(nickname)=>playerDisplayName(nickname)!==nickname?nickname:null;
 const playerNameBlock=(nickname)=>e('span',{style:{display:"inline-flex",flexDirection:"column",gap:2}},e('span',null,playerDisplayName(nickname)),playerSubName(nickname)?e('small',{style:{fontSize:11,color:"#9ec5b1",fontWeight:400}},playerSubName(nickname)):null);
 const finalistAliases={...(configRow&&configRow.resultados?.aliases||{}),...CONFIRMED_FINALIST_ALIASES};
 
@@ -272,7 +274,7 @@ const ALL_PLAYERS=Array.from(new Set([...effectiveRoster,...activeFechas.flatMap
 const years=Array.from(new Set([2026,2027,...fechas.filter(f=>!String(f.nombre||"").startsWith("CONFIG - JUGADORES")).map(seasonOf),...fechas.filter(f=>String(f.nombre||"").startsWith("CONFIG - JUGADORES - ")).map(f=>Number(f.nombre.split(" - ").pop()))])).filter(Number.isFinite).sort((a,b)=>a-b);
 async function saveRoster(next){try{
 if(season===2026)throw new Error("La temporada 2026 está cerrada.");
-const payload={nombre:"CONFIG - JUGADORES - "+season,es_playoff:false,resultados:{players:next},pagos:{},daily_wins:{}};
+const payload={nombre:"CONFIG - JUGADORES - "+season,es_playoff:false,resultados:{...seasonConfig?.resultados,players:next},pagos:{},daily_wins:{}};
 if(seasonConfig)await dbUpdate(seasonConfig.id,payload);else await dbInsert(payload);
 setRoster(next);await loadFechas();
 }catch(e){alert("No se guardaron los jugadores: "+e.message);}}
@@ -281,13 +283,33 @@ try{const payload={nombre:"CONFIG - JUGADORES",es_playoff:false,resultados:{play
 if(configRow)await dbUpdate(configRow.id,payload);else await dbInsert(payload);
 await loadFechas();}catch(e){alert("No se guardaron los nombres equivalentes: "+e.message);}
 }
-function addPlayer(){if(season===2026)return;const n=newPlayer.trim();if(!n||effectiveRoster.some(p=>p.toLowerCase()===n.toLowerCase()))return;saveRoster([...effectiveRoster,n]);setNewPlayer("");}
+async function savePlayerNames(next){
+if(season===2026)return;
+try{
+const payload={nombre:"CONFIG - JUGADORES - "+season,es_playoff:false,resultados:{...seasonConfig?.resultados,players:effectiveRoster,playerNames:next},pagos:{},daily_wins:{}};
+if(seasonConfig)await dbUpdate(seasonConfig.id,payload);else await dbInsert(payload);
+await loadFechas();
+}catch(e){alert("No se guardó el nombre del jugador: "+e.message);}
+}
+async function addPlayer(){
+if(season===2026)return;
+const name=newPlayer.trim(),nickname=newNickname.trim();
+if(!name||!nickname){alert("Ingresa el nombre completo y el apodo.");return;}
+if(effectiveRoster.some(p=>p.toLowerCase()===nickname.toLowerCase())){alert("Ese apodo ya existe en esta temporada.");return;}
+try{
+const nextNames={...seasonPlayerNames,[nickname]:name};
+const payload={nombre:"CONFIG - JUGADORES - "+season,es_playoff:false,resultados:{...seasonConfig?.resultados,players:[...effectiveRoster,nickname],playerNames:nextNames},pagos:{},daily_wins:{}};
+if(seasonConfig)await dbUpdate(seasonConfig.id,payload);else await dbInsert(payload);
+setRoster([...effectiveRoster,nickname]);setNewPlayer("");setNewNickname("");await loadFechas();
+}catch(e){alert("No se pudo agregar el jugador: "+e.message);}
+}
+function editPlayerName(n){if(season===2026)return;const name=prompt("Nombre completo de "+n,playerDisplayName(n));if(name===null)return;if(!name.trim()){alert("El nombre no puede quedar vacío.");return;}savePlayerNames({...seasonPlayerNames,[n]:name.trim()});}
 function removePlayer(n){if(season===2026)return;if(confirm("¿Retirar a "+n+" de "+season+"? Los resultados anteriores no se borrarán."))saveRoster(effectiveRoster.filter(p=>p!==n));}
 async function createSeason(){
 const year=Math.max(...years)+1;
 if(!confirm("¿Crear la temporada "+year+" con el plantel actual como punto de partida?"))return;
 try{
-await dbInsert({nombre:"CONFIG - JUGADORES - "+year,es_playoff:false,resultados:{players:effectiveRoster.slice()},pagos:{},daily_wins:{}});
+await dbInsert({nombre:"CONFIG - JUGADORES - "+year,es_playoff:false,resultados:{players:effectiveRoster.slice(),playerNames:{...Object.fromEntries(effectiveRoster.map(n=>[n,playerDisplayName(n)]))}},pagos:{},daily_wins:{}});
 await loadFechas();setSeason(year);setActiveTab("ranking");setShowRoster(true);
 }catch(e){alert("No se pudo crear la temporada: "+e.message);}
 }
@@ -644,8 +666,8 @@ e('select',{value:finalistAliases[row[1]]||"",onChange:ev=>saveAliases({...final
 e('option',{value:""},"Sin relacionar"),...effectiveRoster.map(n=>e('option',{key:n,value:n},n))))
 )),
 
-e('div',{className:"add-player"},e('input',{value:newPlayer,placeholder:"Nombre del jugador",onChange:ev=>setNewPlayer(ev.target.value)}),e('button',{disabled:season===2026,onClick:addPlayer},"Agregar")),
-...effectiveRoster.map(n=>e('div',{key:n,className:"roster-player"},playerNameBlock(n),e('button',{disabled:season===2026,onClick:()=>removePlayer(n)},"Retirar"))),
+e('div',{className:"add-player",style:{flexWrap:"wrap"}},e('input',{value:newPlayer,placeholder:"Nombre completo",onChange:ev=>setNewPlayer(ev.target.value)}),e('input',{value:newNickname,placeholder:"Apodo (único)",onChange:ev=>setNewNickname(ev.target.value)}),e('button',{disabled:season===2026,onClick:addPlayer},"Agregar jugador")),
+...effectiveRoster.map(n=>e('div',{key:n,className:"roster-player"},playerNameBlock(n),e('button',{disabled:season===2026,onClick:()=>editPlayerName(n)},"Editar nombre"),e('button',{disabled:season===2026,onClick:()=>removePlayer(n)},"Retirar"))),
 e('small',null,"Jugadores compartidos en Supabase, por temporada. Retirar un jugador no borra fechas anteriores.")
 ):null,
 e('div',{className:"wow-secondary-tabs"},
