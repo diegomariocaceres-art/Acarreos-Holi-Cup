@@ -18,7 +18,7 @@ button,input{font-family:system-ui,-apple-system,sans-serif!important}button{tra
 .roster-box h3{margin:0 0 12px;color:#f5d471}.add-player{display:flex;gap:8px;margin-bottom:10px}.add-player input{background:#082830;color:white;border:1px solid #517e6e;border-radius:10px;padding:10px;min-width:100px;flex:1}
 .roster-player{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #315249;padding:8px 0}.roster-player button{color:#ffb6b6;padding:6px 10px}
  .archive2026{padding:4px}.archive-hero{text-align:center;padding:25px 14px;border-radius:20px;background:linear-gradient(135deg,#124b3c,#15374c);border:1px solid #ba9f50}.archive-hero h2{color:#f5d879;margin:7px 0;letter-spacing:1px}.archive-hero strong{font-size:17px;color:white}.archive-hero p{color:#9dc5b6}.archive-note{color:#a9c6c5;font-size:12px;line-height:1.55}.archive-label,.archive-row{display:grid;grid-template-columns:54px minmax(0,1fr) 55px 50px;align-items:center;gap:8px;padding:12px 9px}.archive-label{color:#9fb8b3;font-size:10px;letter-spacing:1px}.archive-label span:first-child{grid-column:1/3}.archive-row{background:#123039;border:1px solid #345651;border-radius:12px;margin-bottom:7px;color:#f1f4e9}.archive-position{color:#f6d574;font-weight:800}.archive-name{font-weight:650}.archive-row strong{color:#f6d574;text-align:right}
-</style></head>
+button:disabled{opacity:.4!important;cursor:not-allowed!important}</style></head>
 <body style="margin:0;background:#0a0a0a">
 <div id="root"></div>
 <script>
@@ -306,7 +306,7 @@ player.wins[di]>0 ? e('div',{style:{fontSize:"10px",color:"#4bc87a"}},"🏆") : 
 ) : null
 );
 }),
-e('button',{onClick:openAddDate,style:{width:"100%",marginTop:"16px",padding:"14px",background:"linear-gradient(135deg,#1a3a1a,#0d2137)",border:"2px dashed rgba(200,168,75,0.4)",borderRadius:"12px",color:"#c8a84b",fontSize:"14px",letterSpacing:"2px",textTransform:"uppercase",cursor:"pointer",fontFamily:"inherit"}}, "+ Agregar Fecha")
+e('button',{disabled:VIEW_ONLY||season===2026,onClick:openAddDate,style:{width:"100%",marginTop:"16px",padding:"14px",background:"linear-gradient(135deg,#1a3a1a,#0d2137)",border:"2px dashed rgba(200,168,75,0.4)",borderRadius:"12px",color:"#c8a84b",fontSize:"14px",letterSpacing:"2px",textTransform:"uppercase",cursor:"pointer",fontFamily:"inherit"}}, "+ Agregar Fecha")
 );
 }
 function HistorialTab() {
@@ -319,8 +319,8 @@ e('div',{style:{fontSize:"14px",fontWeight:"bold",letterSpacing:"2px",color:f.es
 `📅 ${f.nombre}${f.es_playoff?" ⚔️ PLAYOFF":""}`
 ),
 e('div',{style:{display:"flex",gap:8}},
-e('button',{onClick:()=>openEditDate(f),style:{background:"rgba(200,168,75,0.15)",border:"1px solid rgba(200,168,75,0.3)",borderRadius:6,color:"#c8a84b",fontSize:12,padding:"4px 10px",cursor:"pointer",fontFamily:"inherit"}},"✏️ Editar"),
-e('button',{onClick:()=>setConfirmDelete(f.id),style:{background:"rgba(200,75,75,0.15)",border:"1px solid rgba(200,75,75,0.3)",borderRadius:6,color:"#e87f7f",fontSize:12,padding:"4px 10px",cursor:"pointer",fontFamily:"inherit"}},"🗑️")
+e('button',{disabled:VIEW_ONLY||season===2026,onClick:()=>openEditDate(f),style:{background:"rgba(200,168,75,0.15)",border:"1px solid rgba(200,168,75,0.3)",borderRadius:6,color:"#c8a84b",fontSize:12,padding:"4px 10px",cursor:"pointer",fontFamily:"inherit"}},"✏️ Editar"),
+e('button',{disabled:VIEW_ONLY||season===2026,onClick:()=>setConfirmDelete(f.id),style:{background:"rgba(200,75,75,0.15)",border:"1px solid rgba(200,75,75,0.3)",borderRadius:6,color:"#e87f7f",fontSize:12,padding:"4px 10px",cursor:"pointer",fontFamily:"inherit"}},"🗑️")
 )
 ),
 ...dr.map(([name,pts],rank) =>
@@ -350,7 +350,7 @@ e('span',{style:{flex:1,fontSize:14}},p.name),
 e('span',{style:{color:"#a87fe8",fontWeight:"bold"}},`${p.total} pts`)
 )
 ),
-e('button',{onClick:()=>{openAddDate();setNewIsPlayoff(true);},style:{width:"100%",marginTop:20,padding:"14px",background:"rgba(168,127,232,0.15)",border:"2px dashed rgba(168,127,232,0.4)",borderRadius:"12px",color:"#a87fe8",fontSize:"14px",letterSpacing:"2px",textTransform:"uppercase",cursor:"pointer",fontFamily:"inherit"}},
+e('button',{disabled:VIEW_ONLY||season===2026,onClick:()=>{openAddDate();setNewIsPlayoff(true);},style:{width:"100%",marginTop:20,padding:"14px",background:"rgba(168,127,232,0.15)",border:"2px dashed rgba(168,127,232,0.4)",borderRadius:"12px",color:"#a87fe8",fontSize:"14px",letterSpacing:"2px",textTransform:"uppercase",cursor:"pointer",fontFamily:"inherit"}},
 "+ Agregar Fecha Playoff"
 )
 );
@@ -396,7 +396,7 @@ e('span',{style:{fontSize:22,fontWeight:"bold",color:i<3?trophyColors[i]:"#c8a84
 )
 )
 ),
-!(finalClosed||finalArchive) ? e('button',{onClick:closeFinal,style:{width:"100%",padding:"16px",background:"linear-gradient(135deg,#c84b4b,#8b2020)",border:"none",borderRadius:12,color:"#fff",fontSize:15,fontWeight:"bold",letterSpacing:2,cursor:"pointer",fontFamily:"inherit"}},
+!(finalClosed||finalArchive) ? e('button',{disabled:VIEW_ONLY,onClick:closeFinal,style:{width:"100%",padding:"16px",background:"linear-gradient(135deg,#c84b4b,#8b2020)",border:"none",borderRadius:12,color:"#fff",fontSize:15,fontWeight:"bold",letterSpacing:2,cursor:"pointer",fontFamily:"inherit"}},
 "🏁 CERRAR TORNEO Y REPARTIR POZO"
 ) : e('div',{style:{borderRadius:12,border:"2px solid rgba(200,168,75,0.4)",padding:"20px 16px",background:"rgba(200,168,75,0.06)",textAlign:"center"}},
 e('div',{style:{fontSize:16,color:"#c8a84b",letterSpacing:3,marginBottom:16,fontWeight:"bold"}},"🏆 CAMPEONES HOLI CUP "+season+" 🏆"),
