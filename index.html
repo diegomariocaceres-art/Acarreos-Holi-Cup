@@ -45,6 +45,19 @@ button:disabled{opacity:.4!important;cursor:not-allowed!important}
 .archive-position,.archive-net{color:#ffdb7a!important}
 @media (min-width:760px){#root>div>div:first-child{padding-top:42px!important}.mushroom-mark{width:118px;height:118px}}
 @media (max-width:420px){.season-bar span{width:100%;text-align:center}.archive-row{font-size:12px}.mushroom-mark{width:92px;height:92px}}
+
+.robin-panel{width:100%;margin:auto;max-width:700px}.robin-intro{display:flex;gap:12px;align-items:center;background:linear-gradient(125deg,#184d46,#123448);padding:14px 15px;border:1px solid #6a8d71;border-radius:18px;margin-bottom:12px}
+.robin-intro h2{margin:0;font-size:17px;color:#ffe08d;letter-spacing:1.8px}.robin-intro p{margin:4px 0 0;font-size:11px;color:#c2dcd6}
+.robin-expand{margin-left:auto;white-space:nowrap;color:#ffdd82;text-decoration:none;border:1px solid #a18b56;padding:8px;border-radius:10px;font-size:11px}
+.robin-frame{width:100%;height:79vh;min-height:630px;border:1px solid #385b52;border-radius:17px;background:#0b1b2b;display:block}
+.mobile-nav{display:none}
+@media(max-width:700px){
+#root>div{padding-bottom:calc(82px + env(safe-area-inset-bottom))!important}
+.mobile-nav{position:fixed;left:0;right:0;bottom:0;z-index:160;display:flex;justify-content:space-around;align-items:stretch;padding:6px 4px calc(6px + env(safe-area-inset-bottom));background:rgba(9,32,42,.97);border-top:1px solid #527367;box-shadow:0 -7px 23px #00101866;backdrop-filter:blur(14px)}
+.mobile-nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;flex:1;border:none!important;background:transparent!important;color:#8faeaa!important;font-size:10px!important;font-weight:750!important;padding:5px 0!important;min-width:0}
+.mobile-nav button.nav-active{color:#f6d77d!important}.mobile-nav-icon{font-size:21px;line-height:1.25}.mobile-nav button.nav-active .mobile-nav-icon{filter:drop-shadow(0 0 8px #f6d77d85)}
+.robin-frame{height:calc(100dvh - 182px);min-height:520px}.robin-intro{padding:12px}.robin-intro h2{font-size:14px}.robin-expand{font-size:10px}
+}
 </style></head>
 <body style="margin:0;background:#0a0a0a">
 <div id="root"></div>
@@ -335,6 +348,7 @@ const tabs = [
 {key:"playoffs",label:"⚔ Playoffs"},
 {key:"final",label:"🏁 Final"},
 {key:"reglas",label:"📋 Reglas"},
+{key:"robin",label:"⛳ Robin"},
 ];
 function RankingTab() {
 return e('div', null,
@@ -548,7 +562,14 @@ activeTab==="ranking" ? (season===2026?e(Archive2026,null):e(RankingTab,null)) :
 activeTab==="historial" ? e(HistorialTab,null) : null,
 activeTab==="playoffs" ? e(PlayoffsTab,null) : null,
 activeTab==="final" ? (season===2026?e(Archive2026,null):e(FinalTab,null)) : null,
-activeTab==="reglas" ? e(ReglasTab,null) : null
+activeTab==="reglas" ? e(ReglasTab,null) : null,
+e('div',{className:"robin-panel",style:{display:activeTab==="robin"?"block":"none"}},
+e('div',{className:"robin-intro"},
+e('div',{style:{fontSize:30}},"⛳"),
+e('div',null,e('h2',null,"HOLI ROBIN"),e('p',null,"Partida de cuatro · 3 tercios · resultados hoyo a hoyo")),
+e('a',{href:"./robin.html",target:"_blank",rel:"noopener",className:"robin-expand"},"Pantalla completa ↗")),
+e('iframe',{title:"Holi Robin - tarjeta de juego",src:"./robin.html",className:"robin-frame",loading:"eager"})
+)
 ),
 confirmDelete ? e('div',{style:{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,padding:20}},
 e('div',{style:{background:"#0d2137",border:"1px solid rgba(200,75,75,0.4)",borderRadius:16,padding:24,maxWidth:320,width:"100%",textAlign:"center"}},
@@ -591,7 +612,16 @@ editingFecha ? "💾 GUARDAR CAMBIOS" : "GUARDAR FECHA"
 )
 )
 ) : null,
-e('div',{style:{textAlign:"center",padding:"20px",color:"#444",fontSize:"11px",letterSpacing:"1px"}},"ACARREOS HOLI CUP © 2026")
+e('nav',{className:"mobile-nav","aria-label":"Navegación principal"},
+...[
+{key:"ranking",icon:"🏆",name:"Liga"},
+{key:"historial",icon:"📅",name:"Fechas"},
+{key:"robin",icon:"⛳",name:"Robin"},
+{key:"final",icon:"🥇",name:"Final"},
+{key:"reglas",icon:"📋",name:"Reglas"}
+].map(t=>e('button',{key:t.key,type:"button",className:activeTab===t.key?"nav-active":"",onClick:()=>{setActiveTab(t.key);window.scrollTo({top:0,behavior:"smooth"});}},
+e('span',{className:"mobile-nav-icon"},t.icon),e('span',null,t.name)))),
+e('div',{style:{textAlign:"center",padding:"20px",color:"#68827b",fontSize:"11px",letterSpacing:"1px"}},"ACARREOS HOLI CUP © "+season)
 );
 }
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
