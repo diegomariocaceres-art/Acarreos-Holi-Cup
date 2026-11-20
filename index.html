@@ -97,6 +97,38 @@ body{background:var(--wow-night)!important}
 @media (max-width:700px){.wow-hero{padding-top:13px!important}.wow-heading-top{gap:7px}.wow-app-icon{width:44px;height:44px}.wow-corner-mark{width:37px;height:37px}.wow-mascot img{height:clamp(172px,47vw,250px)}.wow-secondary-tabs{padding-bottom:2px}.season-bar button{padding:10px 12px!important}.wow-metric{border-radius:15px}}
 @media (min-width:900px){.wow-mascot img{height:310px}.wow-hero{padding-top:25px!important}.wow-metrics{max-width:580px}}
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+/* Visual fidelity to approved cinematic preview */
+.wow-hero{background:linear-gradient(180deg,#092f32 0%,#074343 62%,#082b32 100%)!important}
+.wow-hero:before{background:radial-gradient(circle at 70% 22%,rgba(255,211,91,.2),transparent 45%),linear-gradient(90deg,rgba(8,32,33,.5),transparent 25%,transparent 75%,rgba(8,32,33,.3))!important}
+.wow-heading-top{position:relative;z-index:3}
+.wow-mascot{margin:0 auto -6px!important;max-width:850px!important;border-radius:0!important}
+.wow-mascot img.wow-hero-photo{height:clamp(200px,53vw,410px)!important;object-fit:cover!important;object-position:center center!important;filter:saturate(1.2) contrast(1.04) drop-shadow(0 6px 15px #062a2860)!important;image-rendering:auto!important}
+.wow-mascot:after{background:linear-gradient(to bottom,rgba(9,53,51,.14) 0%,transparent 18%,transparent 83%,#0c423d 100%)!important}
+.wow-metrics{gap:9px!important;margin-top:-5px!important}
+.wow-metric{border-radius:21px!important;box-shadow:inset 0 1px #ffffff4b,0 0 16px #f0d78020,0 8px 25px #001b1b61!important}
+.wow-metric-icon{color:#f7da82!important;font-size:19px!important}
+.wow-metric strong{font-size:clamp(20px,6vw,32px)!important}
+.wow-season-status{border-color:#50d587!important;color:#b9ffd3!important;background:rgba(5,57,47,.9)!important;box-shadow:0 0 12px #3fee7b2a}
+.season-bar{padding:16px 10px!important}
+.wow-ranking-screen{border:1px solid #497563;border-radius:20px;background:linear-gradient(130deg,#104b43cc,#082e34dd);padding:15px 12px;box-shadow:0 15px 30px #001a1f70}
+.wow-ranking-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.wow-ranking-heading h2{color:#fff5cf;font-size:22px;margin:5px 0}
+.wow-playoffs-shortcut{background:#164c46!important;border:1px solid #77947b!important;color:#e6d39a!important;padding:9px 12px!important;white-space:nowrap;font-size:12px}
+.wow-empty-league{text-align:center;padding:18px 12px 22px;background:linear-gradient(145deg,#123a3e,#08252f);border-radius:16px;border:1px solid #416457}
+.wow-empty-league h3{margin:8px 0;color:#fce09c;font-size:17px}
+.wow-empty-league p{color:#bdd6ce;font-size:13px;line-height:1.5;max-width:360px;margin:8px auto 16px}
+.wow-empty-icon{font-size:36px}
+.wow-empty-league button{display:block;margin:8px auto;padding:11px 15px;background:linear-gradient(135deg,#ffdf88,#dab45b)!important;color:#12322d!important;border:0;border-radius:11px;font-weight:750}
+.wow-empty-league button.wow-hall-link{background:transparent!important;border:1px solid #67896b;color:#e7d6a4!important}
+@media(max-width:700px){
+.wow-secondary-tabs{display:none!important}
+.wow-hero{padding:10px 10px 17px!important}
+.wow-heading-top{padding:3px 5px}
+.wow-mascot img.wow-hero-photo{height:clamp(190px,49vw,300px)!important}
+#root .wow-title{font-size:clamp(27px,7.8vw,39px)!important}
+.wow-ranking-screen{padding:14px 10px}
+}
 </style></head>
 <body style="margin:0;background:#0a0a0a">
 <div id="root"></div>
@@ -186,6 +218,7 @@ pagos[name] = 10;
 });
 return { resultados, pagos };
 }
+const HOLI_CINEMATIC_HERO = "data:image/webp;base64,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";
 function App() {
 const [fechas, setFechas] = useState([]);
 const [season,setSeason]=useState(2027);
@@ -390,7 +423,18 @@ const tabs = [
 {key:"robin",label:"⛳ Robin"},
 ];
 function RankingTab() {
-return e('div', null,
+return e('div',{className:"wow-ranking-screen"},
+e('div',{className:"wow-ranking-heading"},
+ e('div',null,e('div',{className:"wow-eyebrow"},"CLASIFICACIÓN OFICIAL"),e('h2',null,"🏆 Liga "+season)),
+ e('button',{className:"wow-playoffs-shortcut",onClick:()=>setActiveTab("playoffs")},"⚔ Playoffs")
+),
+season!==2026 && activeFechas.length===0 ? e('div',{className:"wow-empty-league"},
+ e('div',{className:"wow-empty-icon"},"⛳"),
+ e('h3',null,"La próxima temporada comienza aquí"),
+ e('p',null,"Los puntos arrancan en cero. Cuando registres la primera fecha, el ranking se actualizará automáticamente."),
+ !VIEW_ONLY?e('button',{onClick:openAddDate},"+ Registrar primera fecha"):null,
+ e('button',{className:"wow-hall-link",onClick:()=>{setSeason(2026);setActiveTab("ranking");}},"🏆 Ver campeones 2026")
+):null,
 e('div',{style:{marginBottom:12,fontSize:11,color:"#667",letterSpacing:1}},`Top 8 puntajes · Playoffs ×${season===2026?"2":"1.5"} · Mín. 6 fechas para clasificar`),
 ...withPos.map(player => {
 const isTop3 = player.pos<=3;
@@ -562,7 +606,7 @@ e('div',{className:"wow-heading"},
   e('div',{className:"wow-corner-mark"},"✦")
  ),
  e('div',{className:"wow-mascot",role:"img","aria-label":"Mascota champiñón golfista haciendo swing"},
-   e('img',{src:"./mascot-swing.svg",alt:"Champiñón golfista haciendo swing en el campo"})
+   e('img',{src:HOLI_CINEMATIC_HERO,alt:"Mascota golfista haciendo swing sobre un campo al atardecer",className:"wow-hero-photo"})
  )
 ),
 e('div',{className:"wow-metrics"},
