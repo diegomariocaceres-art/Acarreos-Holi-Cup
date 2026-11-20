@@ -58,6 +58,45 @@ button:disabled{opacity:.4!important;cursor:not-allowed!important}
 .mobile-nav button.nav-active{color:#f6d77d!important}.mobile-nav-icon{font-size:21px;line-height:1.25}.mobile-nav button.nav-active .mobile-nav-icon{filter:drop-shadow(0 0 8px #f6d77d85)}
 .robin-frame{height:calc(100dvh - 182px);min-height:520px}.robin-intro{padding:12px}.robin-intro h2{font-size:14px}.robin-expand{font-size:10px}
 }
+
+/* HOLI CUP WOW — MOBILE FIRST */
+:root{color-scheme:dark;--wow-night:#061e25;--wow-dark:#092f33;--wow-gold:#f8d778;--wow-green:#3da875}
+body{background:var(--wow-night)!important}
+#root>div{background:radial-gradient(ellipse at 30% -10%,#14584f 0%,#081f2c 58%,#061720 100%)!important;overflow-x:hidden}
+.wow-hero{max-width:none;background:radial-gradient(ellipse at 60% 22%,#176955 0%,#0b3b43 58%,#092b39 100%)!important;padding:18px 14px 20px!important;text-align:center;position:relative;isolation:isolate;overflow:hidden;border-bottom:1px solid #65876d!important}
+.wow-hero:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 82% 28%,rgba(239,211,103,.15),transparent 38%);z-index:-1}
+.wow-heading,.wow-metrics,.wow-season-status{max-width:780px;margin-left:auto;margin-right:auto}
+.wow-heading-top{display:flex;align-items:center;gap:11px;justify-content:center;position:relative}
+.wow-app-icon{width:48px;height:48px;flex-shrink:0;border-radius:15px;border:1px solid rgba(248,217,120,.45);background:#0d443b;box-shadow:0 4px 19px #051e1c77;padding:3px}
+.wow-heading-copy{min-width:0;flex:1;text-align:center}
+.wow-eyebrow{font-size:9px;font-weight:850;letter-spacing:2px;color:#d6e9d7;white-space:nowrap}
+#root .wow-title{font-size:clamp(28px,7.8vw,49px)!important;line-height:.99!important;letter-spacing:-1.1px!important;margin:7px 0 0!important;text-shadow:0 3px 15px #092420a6}
+.wow-title span{display:block;color:var(--wow-gold)!important;font-weight:950}
+.wow-corner-mark{width:42px;height:42px;display:grid;place-items:center;flex-shrink:0;border:1px solid #759876;color:#f8d778;border-radius:50%;background:#0f443b;font-size:21px}
+.wow-mascot{width:100%;max-width:750px;margin:2px auto -8px;position:relative;overflow:hidden;border-radius:22px}
+.wow-mascot:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(to bottom,transparent 79%,#0b3b43 100%)}
+.wow-mascot img{width:100%;height:clamp(170px,38vw,292px);display:block;object-fit:cover;object-position:center 43%;filter:drop-shadow(0 8px 13px #061b1790)}
+.wow-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;position:relative;z-index:1}
+.wow-metric{border:1px solid rgba(249,213,121,.6);border-radius:17px;background:linear-gradient(145deg,rgba(40,111,85,.78),rgba(7,48,53,.92));padding:9px 3px 10px;box-shadow:inset 0 1px #ffffff28,0 5px 16px #00151b46;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px}
+.wow-metric-icon{color:#ffe08b;font-size:15px;line-height:1}.wow-metric strong{font-size:clamp(18px,5.2vw,29px);font-variant-numeric:tabular-nums;color:var(--wow-gold);font-weight:900;white-space:nowrap}
+.wow-metric-label{font-size:clamp(9px,2.5vw,12px);color:#e0f0e7;white-space:nowrap}
+.wow-season-status{display:flex;align-items:center;justify-content:center;gap:8px;width:max-content;max-width:100%;padding:8px 20px;margin-top:13px;background:rgba(9,64,49,.72);border:1px solid #49aa76;border-radius:30px;color:#baf6c8;font-size:10px;letter-spacing:1.3px;font-weight:800}
+.wow-status-dot{background:#5be489;width:8px;height:8px;border-radius:50%;box-shadow:0 0 11px #52e880aa}
+.season-bar{padding:13px 10px 15px!important;background:#082b31!important;border-top:0!important;max-width:none!important;gap:8px!important}
+.season-bar span{width:100%;text-align:center;color:#d7e6d3!important;letter-spacing:2.8px!important;font-size:11px!important;margin:0 0 2px!important}
+.season-bar button{min-height:42px;border-radius:16px!important;background:linear-gradient(150deg,#1b614d,#16463f)!important;border:1px solid #678b69!important;font-weight:800!important;box-shadow:inset 0 1px #ffffff15;color:#fffbe9!important}
+.season-bar button.selected{background:linear-gradient(135deg,#ffe99c,#f2c451)!important;color:#10352e!important;border-color:#ffe5a0!important;box-shadow:0 0 18px #ebc85f69!important}
+.wow-secondary-tabs{display:flex;gap:2px;border-bottom:1px solid #2a5347;background:#08262d;overflow-x:auto;scrollbar-width:none}
+.wow-secondary-tabs::-webkit-scrollbar{display:none}
+.wow-secondary-tabs>button{font-size:11px!important;letter-spacing:.4px!important;min-width:78px!important}
+#root>div>div[style*="max-width: 700px"]{background:transparent}
+.archive2026,.roster-box{max-width:760px;margin:auto}
+.mobile-nav{background:#05252bfa!important;border-top:1px solid #7a9b77!important}
+.mobile-nav button.nav-active{color:#ffe08b!important}
+.robin-intro,.archive-hero{box-shadow:0 12px 32px #001b2066}
+@media (max-width:700px){.wow-hero{padding-top:13px!important}.wow-heading-top{gap:7px}.wow-app-icon{width:44px;height:44px}.wow-corner-mark{width:37px;height:37px}.wow-mascot img{height:clamp(172px,47vw,250px)}.wow-secondary-tabs{padding-bottom:2px}.season-bar button{padding:10px 12px!important}.wow-metric{border-radius:15px}}
+@media (min-width:900px){.wow-mascot img{height:310px}.wow-hero{padding-top:25px!important}.wow-metrics{max-width:580px}}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 </style></head>
 <body style="margin:0;background:#0a0a0a">
 <div id="root"></div>
@@ -512,27 +551,37 @@ e('div',{style:{color:"#bbb",fontSize:"14px"}},r.content)
 }
 const participantes = ALL_PLAYERS.filter(p => rankingInput[p] && rankingInput[p] !== "" && parseInt(rankingInput[p]) > 0);
 return e('div',{style:{minHeight:"100vh",background:"linear-gradient(135deg,#0a0f1e 0%,#0d2137 50%,#0a1a0f 100%)",fontFamily:"Georgia,serif",color:"#e8dcc8"}},
-e('div',{style:{background:"linear-gradient(180deg,#1a3a1a 0%,#0d2137 100%)",borderBottom:"3px solid #c8a84b",padding:"32px 20px 20px",textAlign:"center"}},
-e('div',{className:"mushroom-mark"},e('img',{src:"./icon.svg",alt:"Mascota de la Holi Cup"})),
-e('div',{className:"hero-kicker"},"HOLI GOLF CLUB • "+(season===2026?"TEMPORADA HISTÓRICA":"TEMPORADA "+season)),
-e('h1',{style:{margin:0,fontSize:"clamp(28px,7vw,52px)",fontWeight:"900",color:"#fff",lineHeight:1.1}},
-"ACARREOS",e('br',null),e('span',{style:{color:"#c8a84b"}},"HOLI CUP")
+e('header',{className:"wow-hero"},
+e('div',{className:"wow-heading"},
+ e('div',{className:"wow-heading-top"},
+  e('img',{src:"./icon.svg",alt:"Holi Cup",className:"wow-app-icon"}),
+  e('div',{className:"wow-heading-copy"},
+   e('div',{className:"wow-eyebrow"},"HOLI GOLF CLUB • "+(season===2026?"HALL OF FAME":"TEMPORADA "+season)),
+   e('h1',{className:"wow-title"},"ACARREOS",e('span',null,"HOLI CUP"))
+  ),
+  e('div',{className:"wow-corner-mark"},"✦")
+ ),
+ e('div',{className:"wow-mascot",role:"img","aria-label":"Mascota champiñón golfista haciendo swing"},
+   e('img',{src:"./mascot-swing.svg",alt:"Champiñón golfista haciendo swing en el campo"})
+ )
 ),
-e('div',{style:{marginTop:"16px",display:"flex",justifyContent:"center",gap:"24px",flexWrap:"wrap"}},
-...[{label:"Fechas Jugadas",value:activeFechas.length},{label:"Pozo Acumulado",value:`$${pot}`},{label:"Clasificados",value:`${qualified.length} / ${ALL_PLAYERS.length}`}].map(s=>
-e('div',{key:s.label,style:{background:"rgba(200,168,75,0.1)",border:"1px solid rgba(200,168,75,0.3)",borderRadius:"8px",padding:"8px 16px",textAlign:"center"}},
-e('div',{style:{fontSize:"20px",fontWeight:"bold",color:"#c8a84b"}},s.value),
-e('div',{style:{fontSize:"11px",color:"#9aa",letterSpacing:"1px"}},s.label)
-)
-)
+e('div',{className:"wow-metrics"},
+ ...[
+ {icon:"▣",value:activeFechas.length,label:"Fechas jugadas"},
+ {icon:"◉",value:"$"+pot,label:"Pozo acumulado"},
+ {icon:"♧",value:qualified.length+" / "+ALL_PLAYERS.length,label:"Clasificados"}
+ ].map(s=>e('div',{key:s.label,className:"wow-metric"},
+  e('span',{className:"wow-metric-icon"},s.icon),
+  e('strong',null,s.value),
+  e('span',{className:"wow-metric-label"},s.label)
+ ))
 ),
-e('div',{style:{marginTop:"12px",display:"inline-flex",alignItems:"center",gap:6,padding:"6px 16px",borderRadius:20,background:"rgba(75,200,120,0.1)",border:"1px solid rgba(75,200,120,0.3)"}},
-e('span',{style:{width:8,height:8,borderRadius:"50%",background:"#4bc87a",display:"inline-block"}}),
-e('span',{style:{fontSize:12,color:"#4bc87a",letterSpacing:2}},"EN VIVO 🔥")
+e('div',{className:"wow-season-status"},
+ e('span',{className:"wow-status-dot"}),season===2026?"TEMPORADA CERRADA":"TEMPORADA "+season+" · "+(activeFechas.length?"EN CURSO":"PRÓXIMAMENTE")
 )
 ),
 e('div',{className:"season-bar"},
-e('span',null,"Temporada"),
+e('span',null,"TEMPORADA"),
 ...years.map(y=>e('button',{key:y,className:y===season?"selected":"",onClick:()=>{setSeason(y);setActiveTab("ranking");setFinalClosed(false);setFinalScores({});}},String(y))),
 !VIEW_ONLY?e('button',{onClick:()=>setShowRoster(!showRoster)},"⚙ Jugadores"):null,
 !VIEW_ONLY?e('button',{onClick:createSeason},"+ Nueva temporada"):null
@@ -552,7 +601,7 @@ e('div',{className:"add-player"},e('input',{value:newPlayer,placeholder:"Nombre 
 ...effectiveRoster.map(n=>e('div',{key:n,className:"roster-player"},e('span',null,n),e('button',{disabled:season===2026,onClick:()=>removePlayer(n)},"Retirar"))),
 e('small',null,"Jugadores compartidos en Supabase, por temporada. Retirar un jugador no borra fechas anteriores.")
 ):null,
-e('div',{style:{display:"flex",borderBottom:"1px solid rgba(200,168,75,0.2)",background:"rgba(0,0,0,0.3)",overflowX:"auto"}},
+e('div',{className:"wow-secondary-tabs"},
 ...tabs.map(t =>
 e('button',{key:t.key,onClick:()=>setActiveTab(t.key),style:{flex:1,minWidth:"70px",padding:"14px 6px",background:"none",border:"none",color:activeTab===t.key?"#c8a84b":"#888",borderBottom:activeTab===t.key?"3px solid #c8a84b":"3px solid transparent",cursor:"pointer",fontFamily:"inherit",fontSize:"11px",letterSpacing:"1px",textTransform:"uppercase",fontWeight:activeTab===t.key?"bold":"normal",whiteSpace:"nowrap"}},t.label)
 )
