@@ -47,7 +47,7 @@ method: "DELETE", headers
 if (!res.ok) throw new Error(await res.text());
 }
 const POINTS_TABLE = {1:100,2:75,3:60,4:50,5:40,6:30,7:20,8:10,9:1,10:1,11:1,12:1,13:1,14:1,15:1,16:1,17:1,18:1};
-const FINAL_HANDICAP = {1:6,2:5,3:4,4:3,5:2,6:1};
+const FINAL_HANDICAP = {1:5,2:3,3:2,4:1};
 const PRIZE_SPLIT = {1:0.60,2:0.30,3:0.10};
 const ALL_PLAYERS = ["El Doctor","Felipao","Gio","Diegolfa","Felipe R","Ñaño","Daniel B","Garbimba Asesina","Pistolas","Juanca","Paisa","Nayibe","Fercho","El Nene","Metralla","Juan Rory","Chapo","Michael M","Peluza"];
 const trophyColors = ["#FFD700","#C0C0C0","#CD7F32"];
@@ -59,7 +59,7 @@ function buildPlayers(fechas) {
 return ALL_PLAYERS.map(name => {
 const scores = fechas.map(f => {
 const pts = f.resultados[name] ?? 0;
-return f.es_playoff ? pts * 2 : pts;
+return f.es_playoff ? pts * 1.5 : pts;
 });
 const paid = fechas.map(f => f.pagos[name] ?? 0);
 const wins = fechas.map(f => f.daily_wins[name] ?? 0);
@@ -170,7 +170,7 @@ const pot = players.reduce((s,p) => s + p.paid.reduce((a,b)=>a+b,0), 0);
 const qualified = withPos.filter(p => p.datesPlayed >= 6);
 const finalResults = qualified
 .filter(p => finalScores[p.name] != null && finalScores[p.name] !== "")
-.map((p,i) => { const gross = Number(finalScores[p.name]); const hcp = FINAL_HANDICAP[i+1] ?? 0; return { ...p, gross, hcp, net: gross - hcp }; })
+.map((p,i) => { const gross = Number(finalScores[p.name]); const hcp = FINAL_HANDICAP[p.pos] ?? 0; return { ...p, gross, hcp, net: gross - hcp }; })
 .sort((a,b) => a.net - b.net);
 const prizes = finalClosed ? finalResults.slice(0,3).map((p,i) => ({ ...p, prize: Math.round(pot * PRIZE_SPLIT[i+1]) })) : [];
 if (loading) return React.createElement('div', {style:{minHeight:"100vh",background:"#0a0f1e",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",color:"#c8a84b",fontFamily:"Georgia,serif",gap:16}},
@@ -191,7 +191,7 @@ const tabs = [
 ];
 function RankingTab() {
 return e('div', null,
-e('div',{style:{marginBottom:12,fontSize:11,color:"#667",letterSpacing:1}},"Top 8 puntajes · Playoffs ×2 · Mín. 6 fechas para clasificar"),
+e('div',{style:{marginBottom:12,fontSize:11,color:"#667",letterSpacing:1}},"Top 8 puntajes · Playoffs ×1.5 · Mín. 6 fechas para clasificar"),
 ...withPos.map(player => {
 const isTop3 = player.pos<=3;
 const isExpanded = expandedPlayer===player.name;
@@ -259,7 +259,7 @@ function PlayoffsTab() {
 return e('div', null,
 e('div',{style:{marginBottom:16,padding:"14px 16px",borderRadius:10,background:"rgba(168,127,232,0.08)",border:"1px solid rgba(168,127,232,0.25)"}},
 e('div',{style:{fontSize:13,color:"#a87fe8",letterSpacing:2,fontWeight:"bold",marginBottom:6}},"⚔️ PLAYOFFS"),
-e('div',{style:{fontSize:12,color:"#778",lineHeight:1.8}},"Clasifican todos con mínimo 6 fechas jugadas. Top 8 puntajes · Playoffs valen ×2.")
+e('div',{style:{fontSize:12,color:"#778",lineHeight:1.8}},"Clasifican todos con mínimo 6 fechas jugadas. Top 8 puntajes · Playoffs valen ×1.5.")
 ),
 e('div',{style:{fontSize:11,color:"#c8a84b",letterSpacing:2,textTransform:"uppercase",marginBottom:8}},`Clasificados (${qualified.length})`),
 qualified.length===0 ? e('div',{style:{padding:16,color:"#556",fontSize:13,textAlign:"center"}},"Nadie clasifica aún.") : null,
@@ -270,7 +270,7 @@ e('span',{style:{flex:1,fontSize:14}},p.name),
 e('span',{style:{color:"#a87fe8",fontWeight:"bold"}},`${p.total} pts`)
 )
 ),
-e('button',{onClick:()=>{setNewIsPlayoff(true);openAddDate();},style:{width:"100%",marginTop:20,padding:"14px",background:"rgba(168,127,232,0.15)",border:"2px dashed rgba(168,127,232,0.4)",borderRadius:"12px",color:"#a87fe8",fontSize:"14px",letterSpacing:"2px",textTransform:"uppercase",cursor:"pointer",fontFamily:"inherit"}},
+e('button',{onClick:()=>{openAddDate();setNewIsPlayoff(true);},style:{width:"100%",marginTop:20,padding:"14px",background:"rgba(168,127,232,0.15)",border:"2px dashed rgba(168,127,232,0.4)",borderRadius:"12px",color:"#a87fe8",fontSize:"14px",letterSpacing:"2px",textTransform:"uppercase",cursor:"pointer",fontFamily:"inherit"}},
 "+ Agregar Fecha Playoff"
 )
 );
@@ -288,7 +288,7 @@ qualified.length===0 ? e('div',{style:{padding:14,color:"#556",fontSize:13}},"No
 e('div',{key:p.name,style:{display:"flex",alignItems:"center",padding:"10px 16px",borderBottom:"1px solid rgba(255,255,255,0.05)",background:"rgba(255,255,255,0.03)"}},
 e('span',{style:{width:28,color:"#667",fontSize:12}},`${i+1}°`),
 e('span',{style:{flex:1,fontSize:13}},p.name),
-e('span',{style:{color:"#e87f7f",fontSize:13}},`-${FINAL_HANDICAP[i+1]??0} golpes`)
+e('span',{style:{color:"#e87f7f",fontSize:13}},`-${FINAL_HANDICAP[p.pos]??0} golpes`)
 )
 )
 ),
@@ -336,10 +336,10 @@ function ReglasTab() {
 const reglas = [
 {title:"💰 Cuota",content:"$10 por jugador por fecha. Pot diario opcional."},
 {title:"🏆 Puntos",content:"Top 8 resultados de cada jugador cuentan para el ranking."},
-{title:"⚔️ Playoffs",content:"Fechas de playoff valen ×2. Clasifican todos con mínimo 6 fechas."},
+{title:"⚔️ Playoffs",content:"Fechas de playoff valen ×1.5. Clasifican todos con mínimo 6 fechas."},
 {title:"🤝 Empates",content:"Se suman los puntos de las posiciones empatadas y se dividen equitativamente."},
 {title:"🚫 No-shows",content:"El que no juega, no paga ni gana puntos."},
-{title:"🏁 Final",content:"Stroke play. 1° recibe 6 golpes de ventaja, 2° cinco, 3° cuatro, 4° tres, 5° dos, 6° uno."},
+{title:"🏁 Final",content:"Stroke play. 1° recibe 5 golpes, 2° tres, 3° dos y 4° uno."},
 {title:"💵 Reparto",content:"1° recibe 60%, 2° recibe 30%, 3° recibe 10% del pozo."},
 ];
 return e('div',{style:{lineHeight:1.8}},
@@ -403,7 +403,7 @@ e('button',{onClick:()=>{setShowAddDate(false);setEditingFecha(null);},style:{ba
 e('div',{style:{fontSize:12,color:"#778",marginBottom:16}},"Ingresa la posición final de cada jugador (1, 2, 3...). Empates: mismo número. Los que no jugaron déjalos en blanco."),
 e('label',{style:{display:"flex",alignItems:"center",gap:10,marginBottom:16,padding:"10px 14px",borderRadius:8,background:"rgba(168,127,232,0.08)",border:"1px solid rgba(168,127,232,0.2)",cursor:"pointer"}},
 e('input',{type:"checkbox",checked:newIsPlayoff,onChange:ev=>setNewIsPlayoff(ev.target.checked),style:{width:16,height:16}}),
-e('span',{style:{fontSize:13,color:"#a87fe8"}},"⚔️ Fecha de Playoff (×2)")
+e('span',{style:{fontSize:13,color:"#a87fe8"}},"⚔️ Fecha de Playoff (×1.5)")
 ),
 ...ALL_PLAYERS.map(p =>
 e('div',{key:p,style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"8px",padding:"10px 12px",background:rankingInput[p]?"rgba(200,168,75,0.06)":"rgba(255,255,255,0.03)",borderRadius:"8px",border:`1px solid ${rankingInput[p]?"rgba(200,168,75,0.2)":"transparent"}`}},
