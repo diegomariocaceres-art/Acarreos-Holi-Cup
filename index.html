@@ -113,16 +113,23 @@ useEffect(()=>{localStorage.setItem("holiCupPlayers",JSON.stringify(roster));},[
 const seasonOf=f=>{const m=String(f.nombre||"").match(/^(\d{4}) - /);return m?Number(m[1]):2026;};
 const configRow=fechas.find(f=>f.nombre==="CONFIG - JUGADORES");
 const effectiveRoster=(configRow&&Array.isArray(configRow.resultados?.players))?configRow.resultados.players:roster;
+const finalistAliases=(configRow&&configRow.resultados?.aliases)||{};
+
 const seasonRows=fechas.filter(f=>f.nombre!=="CONFIG - JUGADORES"&&seasonOf(f)===season);
 const finalArchive=seasonRows.find(f=>String(f.nombre||"").includes("FINAL ARCHIVO"));
 const activeFechas=seasonRows.filter(f=>!String(f.nombre||"").includes("FINAL ARCHIVO"));
 const ALL_PLAYERS=Array.from(new Set([...effectiveRoster,...activeFechas.flatMap(f=>Object.keys(f.resultados||{}))]));
 const years=Array.from(new Set([2026,2027,...fechas.map(seasonOf)])).sort((a,b)=>a-b);
 async function saveRoster(next){try{
-const payload={nombre:"CONFIG - JUGADORES",es_playoff:false,resultados:{players:next},pagos:{},daily_wins:{}};
+const payload={nombre:"CONFIG - JUGADORES",es_playoff:false,resultados:{players:next,aliases:finalistAliases},pagos:{},daily_wins:{}};
 if(configRow)await dbUpdate(configRow.id,payload);else await dbInsert(payload);
 setRoster(next);await loadFechas();
 }catch(e){alert("No se guardaron los jugadores: "+e.message);}}
+async function saveAliases(next){
+try{const payload={nombre:"CONFIG - JUGADORES",es_playoff:false,resultados:{players:effectiveRoster,aliases:next},pagos:{},daily_wins:{}};
+if(configRow)await dbUpdate(configRow.id,payload);else await dbInsert(payload);
+await loadFechas();}catch(e){alert("No se guardaron los nombres equivalentes: "+e.message);}
+}
 function addPlayer(){const n=newPlayer.trim();if(!n||effectiveRoster.some(p=>p.toLowerCase()===n.toLowerCase()))return;saveRoster([...effectiveRoster,n]);setNewPlayer("");}
 function removePlayer(n){if(confirm("¿Quitar "+n+" de la lista activa? Los resultados históricos se conservan."))saveRoster(effectiveRoster.filter(p=>p!==n));}
 
@@ -232,7 +239,7 @@ const FINAL_2026=[
 ["8","S. Orrego",98,"+7"],["9","R. Metral",96,"+8"],["10","J. Rodriguez",101,"+9"],["11","G. Orrego",101,"+10"]
 ];
 function Archive2026(){
-const finalists=new Set(FINAL_2026.map(x=>x[1].toLowerCase()));
+const finalists=new Set([...FINAL_2026.map(x=>x[1].toLowerCase()),...Object.values(finalistAliases).filter(Boolean).map(x=>x.toLowerCase())]);
 const other=buildPlayers(activeFechas,ALL_PLAYERS,2026).filter(p=>!finalists.has(p.name.toLowerCase()))
 .sort((a,b)=>b.total-a.total||a.name.localeCompare(b.name));
 return e('section',{className:"archive2026"},
@@ -242,7 +249,8 @@ e('div',{className:"archive-label"},e('span',null,"JUGADOR"),e('span',null,"BRUT
 ...FINAL_2026.map((x,i)=>e('div',{key:i,className:"archive-row"},
 e('span',{className:"archive-position"},x[0]==="1"?"🥇":x[0]==="T2"?"🥈":x[0]),e('span',{className:"archive-name"},x[1]),e('span',null,x[2]),e('strong',null,x[3]))),
 e('h3',{style:{marginTop:24,color:"#f0d77a"}},"Puestos 12 en adelante"),
-e('p',{className:"archive-note"},"Jugadores restantes ordenados por puntos de temporada antes de la final. Se muestran los nombres tal como están registrados en la liga."),
+e('p',{className:"archive-note"},"Jugadores restantes ordenados por puntos de temporada antes de la final. Para evitar duplicados, relaciona los nombres abreviados de los finalistas con sus apodos de la liga desde ⚙ Jugadores."),
+
 e('div',{className:"archive-label"},e('span',null,"JUGADOR"),e('span',null,"FECHAS"),e('span',null,"PUNTOS")),
 ...other.map((p,i)=>e('div',{key:p.name,className:"archive-row"},e('span',{className:"archive-position"},i+12),e('span',{className:"archive-name"},p.name),e('span',null,p.datesPlayed),e('strong',null,p.total))),
 e('small',null,"Temporada 2026 archivada · Final oficial no editable"));
@@ -437,10 +445,19 @@ e('span',{style:{fontSize:12,color:"#4bc87a",letterSpacing:2}},"EN VIVO 🔥")
 e('div',{className:"season-bar"},
 e('span',null,"Temporada"),
 ...years.map(y=>e('button',{key:y,className:y===season?"selected":"",onClick:()=>{setSeason(y);setActiveTab("ranking");setFinalClosed(false);setFinalScores({});}},String(y))),
-e('button',{onClick:()=>setShowRoster(!showRoster)},"⚙ Jugadores")
+e('button',{onClick:()=>setShowRoster(!showRoster)},"⚙ Jugadores"),
+e('button',{onClick:()=>{const y=Math.max(...years)+1;if(confirm("¿Preparar temporada "+y+"?")){setSeason(y);setActiveTab("ranking");}}},"+ Año")
 ),
 showRoster?e('div',{className:"roster-box"},
 e('h3',null,"Administrar jugadores"),
+e('details',{style:{marginBottom:16}},e('summary',{style:{color:"#f6d474",cursor:"pointer",marginBottom:8}},"Relacionar finalistas 2026 con sus apodos"),
+e('p',{style:{fontSize:12,color:"#a8c5be"}},"Escoge el apodo utilizado en las fechas de la liga para que un finalista no aparezca otra vez desde el puesto 12."),
+...FINAL_2026.map(row=>e('label',{key:row[1],style:{display:"flex",gap:8,alignItems:"center",justifyContent:"space-between",marginBottom:7,fontSize:12}},
+e('span',null,row[1]),
+e('select',{value:finalistAliases[row[1]]||"",onChange:ev=>saveAliases({...finalistAliases,[row[1]]:ev.target.value}),style:{width:"52%",padding:7,background:"#13353b",color:"white",border:"1px solid #557b64",borderRadius:8}},
+e('option',{value:""},"Sin relacionar"),...effectiveRoster.map(n=>e('option',{key:n,value:n},n))))
+)),
+
 e('div',{className:"add-player"},e('input',{value:newPlayer,placeholder:"Nombre del jugador",onChange:ev=>setNewPlayer(ev.target.value)}),e('button',{onClick:addPlayer},"Agregar")),
 ...effectiveRoster.map(n=>e('div',{key:n,className:"roster-player"},e('span',null,n),e('button',{onClick:()=>removePlayer(n)},"Eliminar"))),
 e('small',null,"Jugadores activos compartidos con todos los visitantes; los resultados anteriores se conservan.")
