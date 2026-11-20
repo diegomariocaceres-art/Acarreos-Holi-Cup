@@ -198,7 +198,8 @@ const finalResults = qualified
 .filter(p => finalScores[p.name] != null && finalScores[p.name] !== "")
 .map((p,i) => { const gross = Number(finalScores[p.name]); const hcp = (season===2026?FINAL_HANDICAP_2026:FINAL_HANDICAP)[p.pos] ?? 0; return { ...p, gross, hcp, net: gross - hcp }; })
 .sort((a,b) => a.net - b.net);
-const prizes = (finalClosed||finalArchive) ? finalResults.slice(0,3).map((p,i) => ({ ...p, prize: Math.round(pot * PRIZE_SPLIT[i+1]) })) : [];
+const archivedResults = finalArchive ? Object.entries(finalArchive.resultados||{}).map(([name,net])=>({name,net:Number(net)})).sort((a,b)=>a.net-b.net) : [];
+const prizes = (finalClosed||finalArchive) ? (finalArchive?archivedResults:finalResults).slice(0,3).map((p,i) => ({ ...p, prize: Math.round(pot * PRIZE_SPLIT[i+1]) })) : [];
 async function closeFinal(){
 if(!finalResults.length){alert("Ingresa scores para guardar la final.");return;}
 try{await dbInsert({nombre:season+" - FINAL ARCHIVO",es_playoff:false,resultados:Object.fromEntries(finalResults.map(p=>[p.name,p.net])),pagos:{},daily_wins:{}});setFinalClosed(true);await loadFechas();}
@@ -222,7 +223,7 @@ const tabs = [
 ];
 function RankingTab() {
 return e('div', null,
-e('div',{style:{marginBottom:12,fontSize:11,color:"#667",letterSpacing:1}},"Top 8 puntajes · Playoffs ×1.5 · Mín. 6 fechas para clasificar"),
+e('div',{style:{marginBottom:12,fontSize:11,color:"#667",letterSpacing:1}},`Top 8 puntajes · Playoffs ×${season===2026?"2":"1.5"} · Mín. 6 fechas para clasificar`),
 ...withPos.map(player => {
 const isTop3 = player.pos<=3;
 const isExpanded = expandedPlayer===player.name;
@@ -367,10 +368,10 @@ function ReglasTab() {
 const reglas = [
 {title:"💰 Cuota",content:"$10 por jugador por fecha. Pot diario opcional."},
 {title:"🏆 Puntos",content:"Top 8 resultados de cada jugador cuentan para el ranking."},
-{title:"⚔️ Playoffs",content:"Fechas de playoff valen ×1.5. Clasifican todos con mínimo 6 fechas."},
+{title:"⚔️ Playoffs",content:"En 2026 los playoffs valen ×2; desde 2027 valen ×1.5. Clasifican todos con mínimo 6 fechas."},
 {title:"🤝 Empates",content:"Se suman los puntos de las posiciones empatadas y se dividen equitativamente."},
 {title:"🚫 No-shows",content:"El que no juega, no paga ni gana puntos."},
-{title:"🏁 Final",content:"Stroke play. 1° recibe 5 golpes, 2° tres, 3° dos y 4° uno."},
+{title:"🏁 Final",content:"Stroke play. en 2027 el 1° recibe 5 golpes, 2° tres, 3° dos y 4° uno; en 2026 se conservan las ventajas anteriores."},
 {title:"💵 Reparto",content:"1° recibe 60%, 2° recibe 30%, 3° recibe 10% del pozo."},
 ];
 return e('div',{style:{lineHeight:1.8}},
@@ -445,7 +446,7 @@ e('button',{onClick:()=>{setShowAddDate(false);setEditingFecha(null);},style:{ba
 e('div',{style:{fontSize:12,color:"#778",marginBottom:16}},"Ingresa la posición final de cada jugador (1, 2, 3...). Empates: mismo número. Los que no jugaron déjalos en blanco."),
 e('label',{style:{display:"flex",alignItems:"center",gap:10,marginBottom:16,padding:"10px 14px",borderRadius:8,background:"rgba(168,127,232,0.08)",border:"1px solid rgba(168,127,232,0.2)",cursor:"pointer"}},
 e('input',{type:"checkbox",checked:newIsPlayoff,onChange:ev=>setNewIsPlayoff(ev.target.checked),style:{width:16,height:16}}),
-e('span',{style:{fontSize:13,color:"#a87fe8"}},"⚔️ Fecha de Playoff (×1.5)")
+e('span',{style:{fontSize:13,color:"#a87fe8"}},`⚔️ Fecha de Playoff (×${season===2026?"2":"1.5"})`)
 ),
 ...ALL_PLAYERS.map(p =>
 e('div',{key:p,style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"8px",padding:"10px 12px",background:rankingInput[p]?"rgba(200,168,75,0.06)":"rgba(255,255,255,0.03)",borderRadius:"8px",border:`1px solid ${rankingInput[p]?"rgba(200,168,75,0.2)":"transparent"}`}},
