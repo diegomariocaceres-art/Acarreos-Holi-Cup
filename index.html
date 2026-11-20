@@ -260,6 +260,9 @@ const PLAYER_FULL_NAMES={
 "Felipao":"Felipe Ayala",
 "Metralla":"R. Metral"
 };
+const playerDisplayName=(nickname)=>PLAYER_FULL_NAMES[nickname]||nickname;
+const playerSubName=(nickname)=>PLAYER_FULL_NAMES[nickname]&&PLAYER_FULL_NAMES[nickname]!==nickname?nickname:null;
+const playerNameBlock=(nickname)=>e('span',{style:{display:"inline-flex",flexDirection:"column",gap:2}},e('span',null,playerDisplayName(nickname)),playerSubName(nickname)?e('small',{style:{fontSize:11,color:"#9ec5b1",fontWeight:400}},playerSubName(nickname)):null);
 const finalistAliases={...(configRow&&configRow.resultados?.aliases||{}),...CONFIRMED_FINALIST_ALIASES};
 
 const seasonRows=fechas.filter(f=>!String(f.nombre||"").startsWith("CONFIG - JUGADORES")&&seasonOf(f)===season);
@@ -406,12 +409,12 @@ e('div',{className:"archive-hero"},e('div',{style:{fontSize:45}},"🏆"),e('h2',
 e('p',{className:"archive-note"},"Los golpes de ventaja por temporada y campo ya están aplicados al neto. Se preservan los empates oficiales."),
 e('div',{className:"archive-label"},e('span',null,"JUGADOR"),e('span',null,"BRUTO"),e('span',null,"NETO")),
 ...FINAL_2026.map((x,i)=>e('div',{key:i,className:"archive-row"},
-e('span',{className:"archive-position"},x[0]==="1"?"🥇":x[0]==="T2"?"🥈":x[0]),e('span',{className:"archive-name"},x[1],e('small',{style:{display:"block",color:"#9ec5b1",fontSize:11}},finalistAliases[x[1]]||"")),e('span',null,x[2]),e('strong',null,x[3]))),
+e('span',{className:"archive-position"},x[0]==="1"?"🥇":x[0]==="T2"?"🥈":x[0]),e('span',{className:"archive-name"},playerNameBlock(finalistAliases[x[1]]||x[1])),e('span',null,x[2]),e('strong',null,x[3]))),
 e('h3',{style:{marginTop:24,color:"#f0d77a"}},"Puestos 12 en adelante"),
 e('p',{className:"archive-note"},"Jugadores restantes ordenados por puntos de temporada antes de la final. Para evitar duplicados, relaciona los nombres abreviados de los finalistas con sus apodos de la liga desde ⚙ Jugadores."),
 
 e('div',{className:"archive-label"},e('span',null,"JUGADOR"),e('span',null,"FECHAS"),e('span',null,"PUNTOS")),
-...other.map((p,i)=>e('div',{key:p.name,className:"archive-row"},e('span',{className:"archive-position"},i+12),e('span',{className:"archive-name"},p.name,PLAYER_FULL_NAMES[p.name]?e('small',{style:{display:"block",color:"#9ec5b1",fontSize:11}},PLAYER_FULL_NAMES[p.name]):null),e('span',null,p.datesPlayed),e('strong',null,p.total))),
+...other.map((p,i)=>e('div',{key:p.name,className:"archive-row"},e('span',{className:"archive-position"},i+12),e('span',{className:"archive-name"},playerNameBlock(p.name)),e('span',null,p.datesPlayed),e('strong',null,p.total))),
 e('small',null,"Temporada 2026 archivada · Final oficial no editable"));
 }
 const tabs = [
@@ -444,7 +447,7 @@ return e('div',{key:player.name,onClick:()=>setExpandedPlayer(isExpanded?null:pl
 e('div',{style:{display:"flex",alignItems:"center",padding:"14px 16px",gap:"14px"}},
 e('div',{style:{width:"36px",textAlign:"center",fontSize:isTop3?"24px":"18px",fontWeight:"900",color:isTop3?trophyColors[player.pos-1]:"#667",flexShrink:0}}, isTop3?trophyEmoji[player.pos-1]:`#${player.pos}`),
 e('div',{style:{flex:1}},
-e('div',{style:{fontWeight:"700",fontSize:"16px",color:isTop3?trophyColors[player.pos-1]:"#e8dcc8"}},player.name),
+e('div',{style:{fontWeight:"700",fontSize:"16px",color:isTop3?trophyColors[player.pos-1]:"#e8dcc8"}},playerNameBlock(player.name)),
 e('div',{style:{fontSize:"11px",color:"#777",marginTop:"2px"}},
 `${player.datesPlayed} fecha${player.datesPlayed!==1?"s":""} jugada${player.datesPlayed!==1?"s":""}`,
 !isQualified&&player.datesPlayed>0 ? e('span',{style:{color:"#c87a4b"}},` · Necesita ${6-player.datesPlayed} más`) : null,
@@ -642,7 +645,7 @@ e('option',{value:""},"Sin relacionar"),...effectiveRoster.map(n=>e('option',{ke
 )),
 
 e('div',{className:"add-player"},e('input',{value:newPlayer,placeholder:"Nombre del jugador",onChange:ev=>setNewPlayer(ev.target.value)}),e('button',{disabled:season===2026,onClick:addPlayer},"Agregar")),
-...effectiveRoster.map(n=>e('div',{key:n,className:"roster-player"},e('span',null,n),e('button',{disabled:season===2026,onClick:()=>removePlayer(n)},"Retirar"))),
+...effectiveRoster.map(n=>e('div',{key:n,className:"roster-player"},playerNameBlock(n),e('button',{disabled:season===2026,onClick:()=>removePlayer(n)},"Retirar"))),
 e('small',null,"Jugadores compartidos en Supabase, por temporada. Retirar un jugador no borra fechas anteriores.")
 ):null,
 e('div',{className:"wow-secondary-tabs"},
@@ -690,7 +693,7 @@ e('span',{style:{fontSize:13,color:"#a87fe8"}},`⚔️ Fecha de Playoff (×${sea
 ),
 ...ALL_PLAYERS.map(p =>
 e('div',{key:p,style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"8px",padding:"10px 12px",background:rankingInput[p]?"rgba(200,168,75,0.06)":"rgba(255,255,255,0.03)",borderRadius:"8px",border:`1px solid ${rankingInput[p]?"rgba(200,168,75,0.2)":"transparent"}`}},
-e('span',{style:{flex:1,fontSize:"14px"}},p),
+e('span',{style:{flex:1,fontSize:"14px"}},playerNameBlock(p)),
 e('label',{style:{display:"flex",alignItems:"center",gap:"4px",fontSize:"12px",color:"#4bc87a"}},
 e('input',{type:"radio",name:"winner",checked:newWinner===p,onChange:()=>setNewWinner(newWinner===p?null:p)}), " 🏆"
 ),
