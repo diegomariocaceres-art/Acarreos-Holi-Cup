@@ -6,7 +6,18 @@
 <title>Acarreos Holi Cup</title>
 <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js" crossorigin></script>
 <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js" crossorigin></script>
-</head>
+<style>
+*{box-sizing:border-box}body{font-family:system-ui,-apple-system,sans-serif!important;background:#08202a!important}
+button,input{font-family:system-ui,-apple-system,sans-serif!important}button{transition:transform .15s}button:active{transform:scale(.97)}
+#root>div{font-family:system-ui,-apple-system,sans-serif!important;background:radial-gradient(circle at 10% 0%,#15513d,#0a2231 58%,#0b1820)!important}
+#root>div>div:first-child{background:linear-gradient(135deg,#196448,#153348)!important}
+.season-bar{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;background:#0a2c33;padding:13px;border-bottom:1px solid #466b5b}
+.season-bar span{color:#badace;font-size:12px;font-weight:700}.season-bar button,.roster-box button{background:#204a43;color:#eaf6ee;border:1px solid #557b64;border-radius:12px;padding:9px 14px;cursor:pointer}
+.season-bar button.selected{background:#f4d26b;color:#07302b;font-weight:800}
+.roster-box{max-width:700px;margin:12px auto;border-radius:16px;padding:16px;background:#143338;border:1px solid #537564}
+.roster-box h3{margin:0 0 12px;color:#f5d471}.add-player{display:flex;gap:8px;margin-bottom:10px}.add-player input{background:#082830;color:white;border:1px solid #517e6e;border-radius:10px;padding:10px;min-width:100px;flex:1}
+.roster-player{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #315249;padding:8px 0}.roster-player button{color:#ffb6b6;padding:6px 10px}
+</style></head>
 <body style="margin:0;background:#0a0a0a">
 <div id="root"></div>
 <script>
@@ -48,18 +59,19 @@ if (!res.ok) throw new Error(await res.text());
 }
 const POINTS_TABLE = {1:100,2:75,3:60,4:50,5:40,6:30,7:20,8:10,9:1,10:1,11:1,12:1,13:1,14:1,15:1,16:1,17:1,18:1};
 const FINAL_HANDICAP = {1:5,2:3,3:2,4:1};
+const FINAL_HANDICAP_2026 = {1:6,2:5,3:4,4:3,5:2,6:1};
 const PRIZE_SPLIT = {1:0.60,2:0.30,3:0.10};
-const ALL_PLAYERS = ["El Doctor","Felipao","Gio","Diegolfa","Felipe R","Ñaño","Daniel B","Garbimba Asesina","Pistolas","Juanca","Paisa","Nayibe","Fercho","El Nene","Metralla","Juan Rory","Chapo","Michael M","Peluza"];
+const DEFAULT_PLAYERS = ["El Doctor","Felipao","Gio","Diegolfa","Felipe R","Ñaño","Daniel B","Garbimba Asesina","Pistolas","Juanca","Paisa","Nayibe","Fercho","El Nene","Metralla","Juan Rory","Chapo","Michael M","Peluza"];
 const trophyColors = ["#FFD700","#C0C0C0","#CD7F32"];
 const trophyEmoji = ["🥇","🥈","🥉"];
 function calcTotalPoints(scores) {
 return [...scores].sort((a,b)=>b-a).slice(0,8).reduce((a,b)=>a+b,0);
 }
-function buildPlayers(fechas) {
-return ALL_PLAYERS.map(name => {
+function buildPlayers(fechas, roster, season) {
+return roster.map(name => {
 const scores = fechas.map(f => {
 const pts = f.resultados[name] ?? 0;
-return f.es_playoff ? pts * 1.5 : pts;
+return f.es_playoff ? pts * (season >= 2027 ? 1.5 : 2) : pts;
 });
 const paid = fechas.map(f => f.pagos[name] ?? 0);
 const wins = fechas.map(f => f.daily_wins[name] ?? 0);
@@ -92,6 +104,20 @@ return { resultados, pagos };
 }
 function App() {
 const [fechas, setFechas] = useState([]);
+const [season,setSeason]=useState(2027);
+const [roster,setRoster]=useState(()=>{try{const a=JSON.parse(localStorage.getItem("holiCupPlayers"));return Array.isArray(a)?a:DEFAULT_PLAYERS;}catch(e){return DEFAULT_PLAYERS;}});
+const [newPlayer,setNewPlayer]=useState("");
+const [showRoster,setShowRoster]=useState(false);
+useEffect(()=>{localStorage.setItem("holiCupPlayers",JSON.stringify(roster));},[roster]);
+const seasonOf=f=>{const m=String(f.nombre||"").match(/^(\d{4}) - /);return m?Number(m[1]):2026;};
+const seasonRows=fechas.filter(f=>seasonOf(f)===season);
+const finalArchive=seasonRows.find(f=>String(f.nombre||"").includes("FINAL ARCHIVO"));
+const activeFechas=seasonRows.filter(f=>!String(f.nombre||"").includes("FINAL ARCHIVO"));
+const ALL_PLAYERS=Array.from(new Set([...roster,...activeFechas.flatMap(f=>Object.keys(f.resultados||{}))]));
+const years=Array.from(new Set([2026,2027,...fechas.map(seasonOf)])).sort((a,b)=>a-b);
+function addPlayer(){const n=newPlayer.trim();if(!n||roster.some(p=>p.toLowerCase()===n.toLowerCase()))return;setRoster(r=>[...r,n]);setNewPlayer("");}
+function removePlayer(n){if(confirm("¿Quitar "+n+" de la lista activa? Los resultados históricos se conservan."))setRoster(r=>r.filter(p=>p!==n));}
+
 const [activeTab, setActiveTab] = useState("ranking");
 const [showAddDate, setShowAddDate] = useState(false);
 const [editingFecha, setEditingFecha] = useState(null);
@@ -145,7 +171,7 @@ try {
 if (editingFecha) {
 await dbUpdate(editingFecha.id, { es_playoff: newIsPlayoff, resultados, pagos, daily_wins });
 } else {
-await dbInsert({ nombre: `Fecha ${fechas.length + 1}`, es_playoff: newIsPlayoff, resultados, pagos, daily_wins });
+await dbInsert({ nombre: `${season} - Fecha ${activeFechas.length + 1}`, es_playoff: newIsPlayoff, resultados, pagos, daily_wins });
 }
 setShowAddDate(false);
 setEditingFecha(null);
@@ -159,7 +185,7 @@ setConfirmDelete(null);
 loadFechas();
 } catch(e) { alert("Error borrando: " + e.message); }
 }
-const players = buildPlayers(fechas);
+const players = buildPlayers(activeFechas,ALL_PLAYERS,season);
 const ranked = [...players].sort((a,b) => b.total - a.total);
 let pos = 1;
 const withPos = ranked.map((p,i) => {
@@ -170,9 +196,14 @@ const pot = players.reduce((s,p) => s + p.paid.reduce((a,b)=>a+b,0), 0);
 const qualified = withPos.filter(p => p.datesPlayed >= 6);
 const finalResults = qualified
 .filter(p => finalScores[p.name] != null && finalScores[p.name] !== "")
-.map((p,i) => { const gross = Number(finalScores[p.name]); const hcp = FINAL_HANDICAP[p.pos] ?? 0; return { ...p, gross, hcp, net: gross - hcp }; })
+.map((p,i) => { const gross = Number(finalScores[p.name]); const hcp = (season===2026?FINAL_HANDICAP_2026:FINAL_HANDICAP)[p.pos] ?? 0; return { ...p, gross, hcp, net: gross - hcp }; })
 .sort((a,b) => a.net - b.net);
-const prizes = finalClosed ? finalResults.slice(0,3).map((p,i) => ({ ...p, prize: Math.round(pot * PRIZE_SPLIT[i+1]) })) : [];
+const prizes = (finalClosed||finalArchive) ? finalResults.slice(0,3).map((p,i) => ({ ...p, prize: Math.round(pot * PRIZE_SPLIT[i+1]) })) : [];
+async function closeFinal(){
+if(!finalResults.length){alert("Ingresa scores para guardar la final.");return;}
+try{await dbInsert({nombre:season+" - FINAL ARCHIVO",es_playoff:false,resultados:Object.fromEntries(finalResults.map(p=>[p.name,p.net])),pagos:{},daily_wins:{}});setFinalClosed(true);await loadFechas();}
+catch(e){alert("No se guardó la final: "+e.message);}
+}
 if (loading) return React.createElement('div', {style:{minHeight:"100vh",background:"#0a0f1e",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",color:"#c8a84b",fontFamily:"Georgia,serif",gap:16}},
 React.createElement('div',{style:{fontSize:32}},"⛳"),
 React.createElement('div',{style:{fontSize:18}},"Cargando...")
@@ -217,8 +248,8 @@ isExpanded ? e('div',{style:{borderTop:"1px solid rgba(200,168,75,0.15)",padding
 e('div',{style:{display:"flex",gap:"8px",flexWrap:"wrap"}},
 ...player.scores.map((pts,di) =>
 e('div',{key:di,style:{background:pts>0?"rgba(200,168,75,0.15)":"rgba(255,255,255,0.05)",border:`1px solid ${pts>0?"rgba(200,168,75,0.3)":"rgba(255,255,255,0.1)"}`,borderRadius:"8px",padding:"8px 14px",textAlign:"center"}},
-e('div',{style:{fontSize:"10px",color:"#888"}},`F${di+1}${fechas[di]?.es_playoff?" ⚔️":""}`),
-e('div',{style:{fontSize:"20px",fontWeight:"bold",color:fechas[di]?.es_playoff?"#a87fe8":pts>0?"#c8a84b":"#555"}},pts>0?pts:"—"),
+e('div',{style:{fontSize:"10px",color:"#888"}},`F${di+1}${activeFechas[di]?.es_playoff?" ⚔️":""}`),
+e('div',{style:{fontSize:"20px",fontWeight:"bold",color:activeFechas[di]?.es_playoff?"#a87fe8":pts>0?"#c8a84b":"#555"}},pts>0?pts:"—"),
 player.wins[di]>0 ? e('div',{style:{fontSize:"10px",color:"#4bc87a"}},"🏆") : null
 )
 )
@@ -231,7 +262,7 @@ e('button',{onClick:openAddDate,style:{width:"100%",marginTop:"16px",padding:"14
 }
 function HistorialTab() {
 return e('div', null,
-...fechas.map(f => {
+...activeFechas.map(f => {
 const dr = Object.entries(f.resultados).sort(([,a],[,b])=>b-a);
 return e('div',{key:f.id,style:{marginBottom:"20px",borderRadius:"12px",border:`1px solid ${f.es_playoff?"rgba(168,127,232,0.3)":"rgba(200,168,75,0.2)"}`,overflow:"hidden",background:"rgba(255,255,255,0.03)"}},
 e('div',{style:{padding:"12px 16px",background:f.es_playoff?"rgba(168,127,232,0.1)":"rgba(200,168,75,0.1)",borderBottom:`1px solid ${f.es_playoff?"rgba(168,127,232,0.2)":"rgba(200,168,75,0.2)"}`,display:"flex",justifyContent:"space-between",alignItems:"center"}},
@@ -288,7 +319,7 @@ qualified.length===0 ? e('div',{style:{padding:14,color:"#556",fontSize:13}},"No
 e('div',{key:p.name,style:{display:"flex",alignItems:"center",padding:"10px 16px",borderBottom:"1px solid rgba(255,255,255,0.05)",background:"rgba(255,255,255,0.03)"}},
 e('span',{style:{width:28,color:"#667",fontSize:12}},`${i+1}°`),
 e('span',{style:{flex:1,fontSize:13}},p.name),
-e('span',{style:{color:"#e87f7f",fontSize:13}},`-${FINAL_HANDICAP[p.pos]??0} golpes`)
+e('span',{style:{color:"#e87f7f",fontSize:13}},`-${(season===2026?FINAL_HANDICAP_2026:FINAL_HANDICAP)[p.pos]??0} golpes`)
 )
 )
 ),
@@ -316,10 +347,10 @@ e('span',{style:{fontSize:22,fontWeight:"bold",color:i<3?trophyColors[i]:"#c8a84
 )
 )
 ),
-!finalClosed ? e('button',{onClick:()=>setFinalClosed(true),style:{width:"100%",padding:"16px",background:"linear-gradient(135deg,#c84b4b,#8b2020)",border:"none",borderRadius:12,color:"#fff",fontSize:15,fontWeight:"bold",letterSpacing:2,cursor:"pointer",fontFamily:"inherit"}},
+!(finalClosed||finalArchive) ? e('button',{onClick:closeFinal,style:{width:"100%",padding:"16px",background:"linear-gradient(135deg,#c84b4b,#8b2020)",border:"none",borderRadius:12,color:"#fff",fontSize:15,fontWeight:"bold",letterSpacing:2,cursor:"pointer",fontFamily:"inherit"}},
 "🏁 CERRAR TORNEO Y REPARTIR POZO"
 ) : e('div',{style:{borderRadius:12,border:"2px solid rgba(200,168,75,0.4)",padding:"20px 16px",background:"rgba(200,168,75,0.06)",textAlign:"center"}},
-e('div',{style:{fontSize:16,color:"#c8a84b",letterSpacing:3,marginBottom:16,fontWeight:"bold"}},"🏆 CAMPEONES HOLI CUP 2026 🏆"),
+e('div',{style:{fontSize:16,color:"#c8a84b",letterSpacing:3,marginBottom:16,fontWeight:"bold"}},"🏆 CAMPEONES HOLI CUP "+season+" 🏆"),
 ...prizes.map((p,i) =>
 e('div',{key:p.name,style:{display:"flex",alignItems:"center",padding:"12px 0",borderBottom:i<prizes.length-1?"1px solid rgba(200,168,75,0.15)":"none"}},
 e('span',{style:{fontSize:24,marginRight:12}},trophyEmoji[i]),
@@ -352,12 +383,12 @@ e('div',{style:{color:"#bbb",fontSize:"14px"}},r.content)
 const participantes = ALL_PLAYERS.filter(p => rankingInput[p] && rankingInput[p] !== "" && parseInt(rankingInput[p]) > 0);
 return e('div',{style:{minHeight:"100vh",background:"linear-gradient(135deg,#0a0f1e 0%,#0d2137 50%,#0a1a0f 100%)",fontFamily:"Georgia,serif",color:"#e8dcc8"}},
 e('div',{style:{background:"linear-gradient(180deg,#1a3a1a 0%,#0d2137 100%)",borderBottom:"3px solid #c8a84b",padding:"32px 20px 20px",textAlign:"center"}},
-e('div',{style:{fontSize:"13px",letterSpacing:"4px",color:"#c8a84b",marginBottom:"8px"}},"⛳ 2026 ⛳"),
+e('div',{style:{fontSize:"13px",letterSpacing:"4px",color:"#c8a84b",marginBottom:"8px"}},"🍄 TEMPORADA "+season+" 🍄"),
 e('h1',{style:{margin:0,fontSize:"clamp(28px,7vw,52px)",fontWeight:"900",color:"#fff",lineHeight:1.1}},
 "ACARREOS",e('br',null),e('span',{style:{color:"#c8a84b"}},"HOLI CUP")
 ),
 e('div',{style:{marginTop:"16px",display:"flex",justifyContent:"center",gap:"24px",flexWrap:"wrap"}},
-...[{label:"Fechas Jugadas",value:fechas.length},{label:"Pozo Acumulado",value:`$${pot}`},{label:"Clasificados",value:`${qualified.length} / ${ALL_PLAYERS.length}`}].map(s=>
+...[{label:"Fechas Jugadas",value:activeFechas.length},{label:"Pozo Acumulado",value:`$${pot}`},{label:"Clasificados",value:`${qualified.length} / ${ALL_PLAYERS.length}`}].map(s=>
 e('div',{key:s.label,style:{background:"rgba(200,168,75,0.1)",border:"1px solid rgba(200,168,75,0.3)",borderRadius:"8px",padding:"8px 16px",textAlign:"center"}},
 e('div',{style:{fontSize:"20px",fontWeight:"bold",color:"#c8a84b"}},s.value),
 e('div',{style:{fontSize:"11px",color:"#9aa",letterSpacing:"1px"}},s.label)
@@ -369,6 +400,17 @@ e('span',{style:{width:8,height:8,borderRadius:"50%",background:"#4bc87a",displa
 e('span',{style:{fontSize:12,color:"#4bc87a",letterSpacing:2}},"EN VIVO 🔥")
 )
 ),
+e('div',{className:"season-bar"},
+e('span',null,"Temporada"),
+...years.map(y=>e('button',{key:y,className:y===season?"selected":"",onClick:()=>{setSeason(y);setActiveTab("ranking");setFinalClosed(false);setFinalScores({});}},String(y))),
+e('button',{onClick:()=>setShowRoster(!showRoster)},"⚙ Jugadores")
+),
+showRoster?e('div',{className:"roster-box"},
+e('h3',null,"Administrar jugadores"),
+e('div',{className:"add-player"},e('input',{value:newPlayer,placeholder:"Nombre del jugador",onChange:ev=>setNewPlayer(ev.target.value)}),e('button',{onClick:addPlayer},"Agregar")),
+...roster.map(n=>e('div',{key:n,className:"roster-player"},e('span',null,n),e('button',{onClick:()=>removePlayer(n)},"Eliminar"))),
+e('small',null,"Lista activa guardada en este navegador; los resultados históricos se conservan.")
+):null,
 e('div',{style:{display:"flex",borderBottom:"1px solid rgba(200,168,75,0.2)",background:"rgba(0,0,0,0.3)",overflowX:"auto"}},
 ...tabs.map(t =>
 e('button',{key:t.key,onClick:()=>setActiveTab(t.key),style:{flex:1,minWidth:"70px",padding:"14px 6px",background:"none",border:"none",color:activeTab===t.key?"#c8a84b":"#888",borderBottom:activeTab===t.key?"3px solid #c8a84b":"3px solid transparent",cursor:"pointer",fontFamily:"inherit",fontSize:"11px",letterSpacing:"1px",textTransform:"uppercase",fontWeight:activeTab===t.key?"bold":"normal",whiteSpace:"nowrap"}},t.label)
@@ -396,7 +438,7 @@ showAddDate ? e('div',{style:{position:"fixed",inset:0,background:"rgba(0,0,0,0.
 e('div',{style:{background:"#0d2137",border:"1px solid rgba(200,168,75,0.3)",borderRadius:"20px 20px 0 0",width:"100%",maxWidth:"700px",maxHeight:"90vh",overflowY:"auto",padding:"24px"}},
 e('div',{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}},
 e('h2',{style:{margin:0,color:newIsPlayoff?"#a87fe8":"#c8a84b",fontSize:"18px"}},
-`${newIsPlayoff?"⚔️":"📅"} ${editingFecha ? "Editar "+editingFecha.nombre : "Fecha "+(fechas.length+1)}${newIsPlayoff?" — PLAYOFF":""}`
+`${newIsPlayoff?"⚔️":"📅"} ${editingFecha ? "Editar "+editingFecha.nombre : "Fecha "+(activeFechas.length+1)}${newIsPlayoff?" — PLAYOFF":""}`
 ),
 e('button',{onClick:()=>{setShowAddDate(false);setEditingFecha(null);},style:{background:"none",border:"none",color:"#888",fontSize:"24px",cursor:"pointer"}},"✕")
 ),
