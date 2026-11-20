@@ -117,7 +117,37 @@ useEffect(()=>{localStorage.setItem("holiCupPlayers",JSON.stringify(roster));},[
 const seasonOf=f=>{const m=String(f.nombre||"").match(/^(\d{4}) - /);return m?Number(m[1]):2026;};
 const configRow=fechas.find(f=>f.nombre==="CONFIG - JUGADORES");
 const effectiveRoster=(configRow&&Array.isArray(configRow.resultados?.players))?configRow.resultados.players:roster;
-const finalistAliases=(configRow&&configRow.resultados?.aliases)||{};
+// Identidades confirmadas para evitar duplicados en el ranking 2026.
+const CONFIRMED_FINALIST_ALIASES={
+"J. Zuluaga":"Garbimba Asesina",
+"D. Caceres":"Diegolfa",
+"C. Fernandez":"Fercho",
+"D. Jaramillo":"Paisa",
+"N. Ramirez":"Nayibe",
+"C. Sarmiento":"Ñaño",
+"F. Ayala":"Felipao",
+"S. Orrego":"Peluza",
+"R. Metral":"Metralla",
+"J. Rodriguez":"Juan Rory",
+"G. Orrego":"Gio"
+};
+const PLAYER_FULL_NAMES={
+"Gio":"Giovani Orrego",
+"Peluza":"Simón Orrego",
+"Garbimba Asesina":"José Zuluaga",
+"El Doctor":"Jaime Gómez",
+"Diegolfa":"Diego Cáceres",
+"Paisa":"Daniel Jaramillo",
+"Juan Rory":"Juan Rodríguez",
+"Ñaño":"Camilo Sarmiento",
+"El Nene":"Felipe McAllister",
+"Juanca":"Juan Camilo Mejía",
+"Nayibe":"Nayib Ramírez",
+"Fercho":"Camilo Fernández",
+"Felipao":"Felipe Ayala",
+"Metralla":"R. Metral"
+};
+const finalistAliases={...(configRow&&configRow.resultados?.aliases||{}),...CONFIRMED_FINALIST_ALIASES};
 
 const seasonRows=fechas.filter(f=>f.nombre!=="CONFIG - JUGADORES"&&seasonOf(f)===season);
 const finalArchive=seasonRows.find(f=>String(f.nombre||"").includes("FINAL ARCHIVO"));
@@ -254,12 +284,12 @@ e('div',{className:"archive-hero"},e('div',{style:{fontSize:45}},"🏆"),e('h2',
 e('p',{className:"archive-note"},"Los golpes de ventaja por temporada y campo ya están aplicados al neto. Se preservan los empates oficiales."),
 e('div',{className:"archive-label"},e('span',null,"JUGADOR"),e('span',null,"BRUTO"),e('span',null,"NETO")),
 ...FINAL_2026.map((x,i)=>e('div',{key:i,className:"archive-row"},
-e('span',{className:"archive-position"},x[0]==="1"?"🥇":x[0]==="T2"?"🥈":x[0]),e('span',{className:"archive-name"},x[1]),e('span',null,x[2]),e('strong',null,x[3]))),
+e('span',{className:"archive-position"},x[0]==="1"?"🥇":x[0]==="T2"?"🥈":x[0]),e('span',{className:"archive-name"},x[1],e('small',{style:{display:"block",color:"#9ec5b1",fontSize:11}},finalistAliases[x[1]]||"")),e('span',null,x[2]),e('strong',null,x[3]))),
 e('h3',{style:{marginTop:24,color:"#f0d77a"}},"Puestos 12 en adelante"),
 e('p',{className:"archive-note"},"Jugadores restantes ordenados por puntos de temporada antes de la final. Para evitar duplicados, relaciona los nombres abreviados de los finalistas con sus apodos de la liga desde ⚙ Jugadores."),
 
 e('div',{className:"archive-label"},e('span',null,"JUGADOR"),e('span',null,"FECHAS"),e('span',null,"PUNTOS")),
-...other.map((p,i)=>e('div',{key:p.name,className:"archive-row"},e('span',{className:"archive-position"},i+12),e('span',{className:"archive-name"},p.name),e('span',null,p.datesPlayed),e('strong',null,p.total))),
+...other.map((p,i)=>e('div',{key:p.name,className:"archive-row"},e('span',{className:"archive-position"},i+12),e('span',{className:"archive-name"},p.name,PLAYER_FULL_NAMES[p.name]?e('small',{style:{display:"block",color:"#9ec5b1",fontSize:11}},PLAYER_FULL_NAMES[p.name]):null),e('span',null,p.datesPlayed),e('strong',null,p.total))),
 e('small',null,"Temporada 2026 archivada · Final oficial no editable"));
 }
 const tabs = [
