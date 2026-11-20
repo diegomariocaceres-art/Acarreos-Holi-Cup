@@ -18,7 +18,34 @@ button,input{font-family:system-ui,-apple-system,sans-serif!important}button{tra
 .roster-box h3{margin:0 0 12px;color:#f5d471}.add-player{display:flex;gap:8px;margin-bottom:10px}.add-player input{background:#082830;color:white;border:1px solid #517e6e;border-radius:10px;padding:10px;min-width:100px;flex:1}
 .roster-player{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #315249;padding:8px 0}.roster-player button{color:#ffb6b6;padding:6px 10px}
  .archive2026{padding:4px}.archive-hero{text-align:center;padding:25px 14px;border-radius:20px;background:linear-gradient(135deg,#124b3c,#15374c);border:1px solid #ba9f50}.archive-hero h2{color:#f5d879;margin:7px 0;letter-spacing:1px}.archive-hero strong{font-size:17px;color:white}.archive-hero p{color:#9dc5b6}.archive-note{color:#a9c6c5;font-size:12px;line-height:1.55}.archive-label,.archive-row{display:grid;grid-template-columns:54px minmax(0,1fr) 55px 50px;align-items:center;gap:8px;padding:12px 9px}.archive-label{color:#9fb8b3;font-size:10px;letter-spacing:1px}.archive-label span:first-child{grid-column:1/3}.archive-row{background:#123039;border:1px solid #345651;border-radius:12px;margin-bottom:7px;color:#f1f4e9}.archive-position{color:#f6d574;font-weight:800}.archive-name{font-weight:650}.archive-row strong{color:#f6d574;text-align:right}
-button:disabled{opacity:.4!important;cursor:not-allowed!important}</style></head>
+button:disabled{opacity:.4!important;cursor:not-allowed!important}
+:root{color-scheme:dark}html{background:#081c26}body{margin:0;font-family:Inter,system-ui,-apple-system,sans-serif!important;background:#081c26!important}
+#root>div{font-family:Inter,system-ui,-apple-system,sans-serif!important;background:radial-gradient(ellipse at 5% 10%,#154a4a 0,#091e2b 48%,#07131f 100%)!important}
+#root>div>div:first-child{position:relative;overflow:hidden;background:radial-gradient(circle at 80% 5%,rgba(253,214,93,.22),transparent 28%),linear-gradient(155deg,#0d534d,#103f54 54%,#182c43)!important;border-bottom:1px solid rgba(244,209,105,.45)!important;padding:30px 16px 26px!important}
+#root>div>div:first-child:before{content:"";position:absolute;top:-130px;left:-80px;width:310px;height:310px;border-radius:50%;border:55px solid rgba(255,255,255,.03);pointer-events:none}
+.mushroom-mark{width:102px;height:102px;margin:0 auto 15px;border-radius:30px;padding:9px;background:linear-gradient(145deg,#356b58,#103d47);border:1px solid rgba(255,234,164,.4);box-shadow:0 15px 32px #071b27a0,0 0 40px #d3b84a28;transform:rotate(-4deg)}
+.mushroom-mark img{width:100%;height:100%;display:block;object-fit:contain}
+.hero-kicker{color:#d5e6df;font-size:11px;font-weight:800;letter-spacing:3px;margin-bottom:10px}
+#root h1{font-family:Inter,system-ui,-apple-system,sans-serif!important;letter-spacing:-1.7px!important;font-weight:950!important;font-size:clamp(36px,8.5vw,62px)!important;line-height:1.02!important;text-shadow:0 3px 12px #07151b55}
+#root h1 span{color:#f9d96d!important;text-shadow:0 5px 20px rgba(240,196,75,.15)}
+.season-bar{background:#0a2531!important;padding:14px 10px!important;box-shadow:inset 0 1px #ffffff0d;gap:8px}
+.season-bar span{text-transform:uppercase;letter-spacing:1.4px;color:#a9c9bb!important}
+.season-bar button,.roster-box button{border-radius:12px!important;padding:10px 13px!important;font-weight:750}
+.season-bar button.selected{background:#f6d778!important;color:#09262b!important;box-shadow:0 3px 14px #efce6340}
+.roster-box{background:linear-gradient(145deg,#113947,#122d36)!important;border:1px solid #547e75!important;box-shadow:0 10px 25px #00101855}
+.roster-box h3{letter-spacing:1px;font-size:19px!important;color:#ffdc78}
+.roster-help{font-size:12px;color:#aac9c3;line-height:1.5}
+.roster-player{padding:12px 5px!important}
+.roster-player>span{font-weight:650}
+#root button{transition:transform .12s,filter .12s,background .12s!important}#root button:not(:disabled):active{transform:scale(.97)}
+#root>div>div:nth-last-child(2){max-width:760px}
+.archive-hero{background:radial-gradient(circle at 50% 0%,#2d7968,#114052 75%)!important;border-radius:22px!important;padding:24px!important;border:1px solid #9fac68!important;box-shadow:0 15px 35px #05151a77}
+.archive-hero h2{font-size:22px;letter-spacing:1.4px}.archive-row{background:linear-gradient(100deg,#163e48,#102b3c)!important;border:1px solid #345a59!important;box-shadow:0 4px 12px #0010153b}
+.archive-row:first-of-type{border-color:#d7b75d!important}
+.archive-position,.archive-net{color:#ffdb7a!important}
+@media (min-width:760px){#root>div>div:first-child{padding-top:42px!important}.mushroom-mark{width:118px;height:118px}}
+@media (max-width:420px){.season-bar span{width:100%;text-align:center}.archive-row{font-size:12px}.mushroom-mark{width:92px;height:92px}}
+</style></head>
 <body style="margin:0;background:#0a0a0a">
 <div id="root"></div>
 <script>
@@ -168,6 +195,14 @@ await loadFechas();}catch(e){alert("No se guardaron los nombres equivalentes: "+
 }
 function addPlayer(){if(season===2026)return;const n=newPlayer.trim();if(!n||effectiveRoster.some(p=>p.toLowerCase()===n.toLowerCase()))return;saveRoster([...effectiveRoster,n]);setNewPlayer("");}
 function removePlayer(n){if(season===2026)return;if(confirm("¿Retirar a "+n+" de "+season+"? Los resultados anteriores no se borrarán."))saveRoster(effectiveRoster.filter(p=>p!==n));}
+async function createSeason(){
+const year=Math.max(...years)+1;
+if(!confirm("¿Crear la temporada "+year+" con el plantel actual como punto de partida?"))return;
+try{
+await dbInsert({nombre:"CONFIG - JUGADORES - "+year,es_playoff:false,resultados:{players:effectiveRoster.slice()},pagos:{},daily_wins:{}});
+await loadFechas();setSeason(year);setActiveTab("ranking");setShowRoster(true);
+}catch(e){alert("No se pudo crear la temporada: "+e.message);}
+}
 
 const [activeTab, setActiveTab] = useState("ranking");
 const [showAddDate, setShowAddDate] = useState(false);
@@ -464,7 +499,8 @@ e('div',{style:{color:"#bbb",fontSize:"14px"}},r.content)
 const participantes = ALL_PLAYERS.filter(p => rankingInput[p] && rankingInput[p] !== "" && parseInt(rankingInput[p]) > 0);
 return e('div',{style:{minHeight:"100vh",background:"linear-gradient(135deg,#0a0f1e 0%,#0d2137 50%,#0a1a0f 100%)",fontFamily:"Georgia,serif",color:"#e8dcc8"}},
 e('div',{style:{background:"linear-gradient(180deg,#1a3a1a 0%,#0d2137 100%)",borderBottom:"3px solid #c8a84b",padding:"32px 20px 20px",textAlign:"center"}},
-e('div',{style:{fontSize:"13px",letterSpacing:"4px",color:"#c8a84b",marginBottom:"8px"}},"🍄 TEMPORADA "+season+" 🍄"),
+e('div',{className:"mushroom-mark"},e('img',{src:"./icon.svg",alt:"Mascota de la Holi Cup"})),
+e('div',{className:"hero-kicker"},"HOLI GOLF CLUB • "+(season===2026?"TEMPORADA HISTÓRICA":"TEMPORADA "+season)),
 e('h1',{style:{margin:0,fontSize:"clamp(28px,7vw,52px)",fontWeight:"900",color:"#fff",lineHeight:1.1}},
 "ACARREOS",e('br',null),e('span',{style:{color:"#c8a84b"}},"HOLI CUP")
 ),
@@ -485,10 +521,11 @@ e('div',{className:"season-bar"},
 e('span',null,"Temporada"),
 ...years.map(y=>e('button',{key:y,className:y===season?"selected":"",onClick:()=>{setSeason(y);setActiveTab("ranking");setFinalClosed(false);setFinalScores({});}},String(y))),
 !VIEW_ONLY?e('button',{onClick:()=>setShowRoster(!showRoster)},"⚙ Jugadores"):null,
-!VIEW_ONLY?e('button',{onClick:()=>{const y=Math.max(...years)+1;if(confirm("¿Preparar temporada "+y+"?")){setSeason(y);setActiveTab("ranking");}}},"+ Año"):null
+!VIEW_ONLY?e('button',{onClick:createSeason},"+ Nueva temporada"):null
 ),
 showRoster&&!VIEW_ONLY?e('div',{className:"roster-box"},
-e('h3',null,"Administrar jugadores · "+season),
+e('h3',null,"PLANTEL "+season),
+e('p',{className:"roster-help"},season===2026?"2026 está cerrada: consulta sus participantes sin modificar resultados.":"Agrega o retira jugadores de esta temporada. La lista se guarda para todos los dispositivos y los años anteriores no cambian."),
 e('details',{style:{marginBottom:16}},e('summary',{style:{color:"#f6d474",cursor:"pointer",marginBottom:8}},"Relacionar finalistas 2026 con sus apodos"),
 e('p',{style:{fontSize:12,color:"#a8c5be"}},"Escoge el apodo utilizado en las fechas de la liga para que un finalista no aparezca otra vez desde el puesto 12."),
 ...FINAL_2026.map(row=>e('label',{key:row[1],style:{display:"flex",gap:8,alignItems:"center",justifyContent:"space-between",marginBottom:7,fontSize:12}},
