@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 550" role="img" aria-labelledby="title desc">
+<title id="title">Mascota golfista Holi Cup haciendo swing</title><desc id="desc">Un simpático champiñón golfista con gorra roja y manchas blancas completa un golpe de golf entre destellos dorados</desc>
+<defs>
+<linearGradient id="sky" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#0c4146"/><stop offset=".48" stop-color="#267c75"/><stop offset="1" stop-color="#e9c879"/></linearGradient>
+<radialGradient id="halo"><stop stop-color="#f2d274" stop-opacity=".45"/><stop offset="1" stop-color="#edcf83" stop-opacity="0"/></radialGradient>
+<linearGradient id="grass" x1="0" x2=".2" y1="0" y2="1"><stop stop-color="#7ba958"/><stop offset=".48" stop-color="#266a4c"/><stop offset="1" stop-color="#063c34"/></linearGradient>
+<linearGradient id="cap" x1=".2" y1=".2" x2=".8" y2="1"><stop stop-color="#fd7963"/><stop offset=".46" stop-color="#e94739"/><stop offset="1" stop-color="#8e1b2b"/></linearGradient>
+<linearGradient id="shirt" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#13875c"/><stop offset="1" stop-color="#063e38"/></linearGradient>
+<linearGradient id="face" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#fff2c0"/><stop offset=".68" stop-color="#f4dba2"/><stop offset="1" stop-color="#deb877"/></linearGradient>
+<filter id="glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="8"/></filter>
+<filter id="shadow" x="-60%" y="-60%" width="220%" height="220%"><feDropShadow dx="0" dy="11" stdDeviation="13" flood-color="#032d25" flood-opacity=".5"/></filter>
+</defs>
+<rect width="920" height="550" fill="url(#sky)"/><ellipse cx="510" cy="238" rx="445" ry="335" fill="url(#halo)"/>
+<path d="M0 350Q105 280 212 335T421 324T648 329T920 300V550H0Z" fill="#165a51" opacity=".55"/>
+<path d="M0 386Q160 312 288 373T567 372T920 350V550H0Z" fill="#2f7860"/>
+<path d="M0 459Q255 388 461 440T920 401V550H0Z" fill="url(#grass)"/>
+<path d="M0 514Q272 445 568 484T920 445V550H0Z" fill="#104c3a" opacity=".65"/>
+<g opacity=".6" fill="#dbd68b"><circle cx="55" cy="315" r="2"/><circle cx="138" cy="360" r="3"/><circle cx="785" cy="356" r="2"/><circle cx="831" cy="295" r="3"/></g>
+<g transform="translate(762 334)"><path d="M0 76V-74" stroke="#fff3c2" stroke-width="6" stroke-linecap="round"/><path d="M3-72L82-49L3-22Z" fill="#ee6650"/><ellipse cx="0" cy="78" rx="35" ry="7" fill="#0e4235" opacity=".5"/></g>
+<path d="M572 165Q707 94 768 163Q803 195 764 238" fill="none" stroke="#ffe191" stroke-width="8" stroke-linecap="round" opacity=".6" filter="url(#glow)"/>
+<path d="M536 189Q693 88 755 145Q798 184 768 216" fill="none" stroke="#fff1b1" stroke-width="4" stroke-linecap="round" stroke-dasharray="6 12"/>
+<g fill="#ffdc72"><circle cx="621" cy="142" r="5"/><circle cx="677" cy="111" r="3"/><circle cx="741" cy="118" r="5"/><path d="M784 235l8-26 8 26 26 8-26 8-8 26-8-26-26-8z" opacity=".9"/></g>
+<circle cx="772" cy="151" r="28" fill="#ffe7aa" filter="url(#glow)" opacity=".65"/>
+<circle cx="772" cy="151" r="17" fill="#fff9e5" stroke="#fff" stroke-width="3"/><g fill="#c9d4ca" opacity=".75"><circle cx="765" cy="145" r="2"/><circle cx="778" cy="146" r="2"/><circle cx="770" cy="156" r="2"/><circle cx="782" cy="156" r="2"/></g>
+<g filter="url(#shadow)">
+<!-- legs and shoes -->
+<path d="M411 397L380 474L438 477L472 409Z" fill="#eee4ca" stroke="#e8c69d" stroke-width="6"/>
+<path d="M468 397L505 469L559 446L528 380Z" fill="#f2e5c5" stroke="#ddc9ab" stroke-width="6"/>
+<path d="M365 471Q381 452 426 470L453 494Q444 515 389 508L360 495Z" fill="#fffef4" stroke="#b9d2c0" stroke-width="5"/>
+<path d="M494 460Q515 440 549 439Q590 455 576 482Q548 495 505 486Z" fill="#fffdf3" stroke="#b9d2c0" stroke-width="5"/>
+<path d="M363 495Q399 503 452 496" stroke="#1b7a55" stroke-width="8"/>
+<path d="M504 484Q544 489 574 475" stroke="#1b7a55" stroke-width="8"/>
+<!-- torso -->
+<path d="M388 318Q440 288 504 313L542 388Q501 434 425 416L388 366Z" fill="url(#shirt)" stroke="#124c3a" stroke-width="7"/>
+<path d="M423 416Q478 429 539 393L539 414Q487 448 421 429Z" fill="#fff8e9"/>
+<path d="M475 418L494 421" stroke="#bda666" stroke-width="8"/>
+<path d="M457 318l24 32 24-37" fill="#e0e8b4" opacity=".8"/>
+<path d="M482 352l-10 49" stroke="#2fc18b" stroke-width="4"/>
+<!-- back arm -->
+<path d="M416 333Q359 306 334 276L352 244Q398 260 445 295Z" fill="#0f684c" stroke="#104836" stroke-width="7"/>
+<!-- head -->
+<ellipse cx="433" cy="255" rx="112" ry="102" fill="url(#face)" stroke="#ddbc8d" stroke-width="6" transform="rotate(-7 433 255)"/>
+<ellipse cx="341" cy="278" rx="15" ry="19" fill="#e8c38f"/>
+<path d="M380 266Q399 242 420 265" fill="none" stroke="#493e33" stroke-width="8" stroke-linecap="round"/>
+<path d="M454 251Q475 233 493 255" fill="none" stroke="#493e33" stroke-width="8" stroke-linecap="round"/>
+<ellipse cx="373" cy="291" rx="19" ry="11" fill="#ef9f92" opacity=".68"/>
+<ellipse cx="503" cy="286" rx="18" ry="11" fill="#eea28e" opacity=".72"/>
+<path d="M408 289Q435 332 467 286Q454 305 439 306Q423 304 408 289Z" fill="#723b3a"/>
+<path d="M419 302Q440 309 456 301" fill="none" stroke="#ffb4ae" stroke-width="5" stroke-linecap="round"/>
+<!-- hat oversized mushroom -->
+<path d="M297 227Q283 143 355 98Q414 61 493 91Q568 115 562 209Q502 235 426 229Q360 231 297 227Z" fill="url(#cap)" stroke="#b72e33" stroke-width="7"/>
+<path d="M294 225Q426 258 561 209Q566 232 546 241Q422 276 313 246Z" fill="#f8e8b4" stroke="#e4cd95" stroke-width="5"/>
+<ellipse cx="354" cy="151" rx="43" ry="35" transform="rotate(-27 354 151)" fill="#fff4d7"/>
+<ellipse cx="468" cy="116" rx="47" ry="22" transform="rotate(21 468 116)" fill="#fff2d5"/>
+<ellipse cx="541" cy="174" rx="19" ry="35" transform="rotate(-17 541 174)" fill="#fff4d7"/>
+<!-- front swing arms -->
+<path d="M490 324Q531 286 559 229L590 242Q571 322 527 354Z" fill="#13785a" stroke="#13523f" stroke-width="7"/>
+<path d="M555 229L576 198Q592 187 606 198L611 219L585 247Z" fill="#fff4dc" stroke="#b9c9a9" stroke-width="4"/>
+<path d="M334 252Q383 290 449 311L465 282Q409 260 365 224Z" fill="#177b5b" stroke="#0b5544" stroke-width="7"/>
+<path d="M354 221L380 204L404 220L381 248Z" fill="#fdf0d6" stroke="#d7c4a5" stroke-width="4"/>
+<!-- club -->
+<path d="M383 214L638 102" stroke="#233f48" stroke-width="11" stroke-linecap="round"/>
+<path d="M386 213L639 100" stroke="#c0c8b9" stroke-width="4" stroke-linecap="round"/>
+<path d="M632 105L671 86Q694 81 686 105L662 126Q647 132 635 115Z" fill="#c3d1cb" stroke="#587f7c" stroke-width="6"/>
+</g>
+<g fill="#c8df88" opacity=".85"><path d="M326 467l-15-21 5 31z"/><path d="M334 473l1-26 10 25z"/><path d="M349 482l-4-28 16 24z"/><circle cx="300" cy="457" r="3"/><circle cx="367" cy="455" r="4"/></g>
+</svg>
