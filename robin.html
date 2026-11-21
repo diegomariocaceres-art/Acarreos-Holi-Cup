@@ -313,6 +313,7 @@ function App(){
    {name:"Jugador 3",hcpIndex:"",tee:"Blue"},
    {name:"Jugador 4",hcpIndex:"",tee:"White"},
  ]); var players=players_[0]; var setPlayers=players_[1];
+ var fixedMode_=s(false); var fixedMode=fixedMode_[0]; var setFixedMode=fixedMode_[1];
  var carts_=s([[0,1],[2,3]]); var carts=carts_[0]; var setCarts=carts_[1];
  var greenOrder_=s([0,1,2,3]); var greenOrder=greenOrder_[0]; var setGreenOrder=greenOrder_[1];
  var greenOrderSet_=s(false); var greenOrderSet=greenOrderSet_[0]; var setGreenOrderSet=greenOrderSet_[1];
@@ -340,7 +341,7 @@ function App(){
  var t1Combo=[[greenOrder[0],greenOrder[2]],[greenOrder[1],greenOrder[3]]];
  var t3Combo=[carts[0],carts[1]];
  var t2Combo=computeT2(t1Combo,t3Combo);
- var terciosCombos=[t1Combo,t2Combo,t3Combo];
+ var terciosCombos=fixedMode?[t3Combo,t3Combo,t3Combo]:[t1Combo,t2Combo,t3Combo];
 
  // Al cambiar de campo, si el tee de un jugador no existe en ese campo, usa el primero disponible
  function changeCourse(c){
@@ -433,7 +434,7 @@ function App(){
  function calcEffective(h,hi){
    var raw=calcRaw(h,hi);
    if(!raw) return null;
-   var isLast=(hi+1)%6===0;
+   var isLast=fixedMode?hi===17:(hi+1)%6===0;
    var mult=isLast?(h.multiplier||1):1;
    return {pts1:raw.pts1*mult,pts2:raw.pts2*mult,pair1:raw.pair1,pair2:raw.pair2,nets:raw.nets,multiplier:mult,rawPts1:raw.pts1};
  }
@@ -453,6 +454,16 @@ function App(){
  // Cada jugador gana/paga el valor completo del tercio
  function calcBalance(){
    var bal=[0,0,0,0];
+   if(fixedMode){
+     var points=0;
+     for(var hi=0;hi<18;hi++){var rr=calcEffective(hoyos[hi],hi);if(rr)points+=rr.pts1;}
+     var amount=Math.abs(points)*pointValue+(points===0?0:baseValue);
+     var winner=points>0?carts[0]:points<0?carts[1]:[];
+     var loser=points>0?carts[1]:points<0?carts[0]:[];
+     winner.forEach(function(i){bal[i]=amount;});
+     loser.forEach(function(i){bal[i]=-amount;});
+     return bal;
+   }
    for(var t=0;t<3;t++){
      var r=calcTercio(t);
      if(r.winner){
@@ -482,6 +493,7 @@ function App(){
  // Puntos acumulados por jugador (suma de los 3 tercios, segun su pareja)
  function calcPlayerPoints(){
    var pts=[0,0,0,0];
+   if(fixedMode){for(var hi=0;hi<18;hi++){var r=calcEffective(hoyos[hi],hi);if(r){r.pair1.forEach(function(i){pts[i]+=r.pts1;});r.pair2.forEach(function(i){pts[i]-=r.pts1;});}}return pts;}
    for(var t=0;t<3;t++){
      var r=calcTercio(t);
      r.pair1.forEach(function(i){pts[i]+=r.total;});
@@ -492,7 +504,7 @@ function App(){
 
  function runningScore(t,upTo){
    var total=0;
-   for(var i=t*6;i<=upTo;i++){var r=calcEffective(hoyos[i],i);if(r) total+=r.pts1;}
+   for(var i=fixedMode?0:t*6;i<=upTo;i++){var r=calcEffective(hoyos[i],i);if(r) total+=r.pts1;}
    return total;
  }
 
@@ -513,7 +525,7 @@ function App(){
    setScreen("summary");
  }
 
- var isLast=(currentHoyo+1)%6===0;
+ var isLast=fixedMode?currentHoyo===17:(currentHoyo+1)%6===0;
  var tercio=Math.floor(currentHoyo/6);
  var pairsNow=getPairs(tercio);
  var holeHcpIdx=cd.hcp[currentHoyo];
@@ -612,6 +624,12 @@ function App(){
      e('div',{style:{marginTop:8,fontSize:11,color:"#667",textAlign:"center"}},"Ej: 3 pts × $"+pointValue+" + $"+baseValue+" = $"+(3*pointValue+baseValue))
    ),
    e('div',{style:{marginBottom:14}},
+     e('div',{style:{fontSize:11,color:GOLD,letterSpacing:2,marginBottom:8}},"MODALIDAD"),
+     e('div',{style:{display:"flex",gap:8,marginBottom:14}},
+       [["Robin",false],["2 vs 2 · 18 hoyos",true]].map(function(opt){
+         return e('button',{key:opt[0],onClick:function(){if(anyScores&&!window.confirm("Cambiar modalidad recalcula los resultados existentes. ¿Continuar?"))return;setFixedMode(opt[1]);setShowMultiplier(false);},style:{flex:1,padding:"12px 6px",borderRadius:10,background:fixedMode===opt[1]?"rgba(200,168,75,0.22)":CARD,border:"1px solid "+(fixedMode===opt[1]?GOLD:BORDER),color:fixedMode===opt[1]?GOLD:"#aaa",fontSize:12,cursor:"pointer",fontFamily:"inherit"}},opt[0]);
+       })
+     ),
      e('div',{style:{fontSize:11,color:GOLD,letterSpacing:2,marginBottom:8}},"JUGADORES"),
      players.map(function(p,i){
        var td=cd.tees[p.tee];
@@ -636,8 +654,8 @@ function App(){
      })
    ),
    e('div',{style:{marginBottom:14,padding:"12px",background:CARD,borderRadius:12,border:"1px solid "+BORDER}},
-     e('div',{style:{fontSize:11,color:GOLD,letterSpacing:2,marginBottom:8}},"🚗 CARRITOS — Tercio 3"),
-     e('div',{style:{fontSize:11,color:"#778",marginBottom:10}},"T3 = carrito vs carrito · T2 automático"),
+     e('div',{style:{fontSize:11,color:GOLD,letterSpacing:2,marginBottom:8}},fixedMode?"🤝 PAREJAS FIJAS — 18 HOYOS":"🚗 CARRITOS — Tercio 3"),
+     e('div',{style:{fontSize:11,color:"#778",marginBottom:10}},fixedMode?"Estos equipos se mantienen del hoyo 1 al 18":"T3 = carrito vs carrito · T2 automático"),
      e('div',{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}},
        [0,1].map(function(c){
          return e('div',{key:c,style:{padding:"10px",borderRadius:10,background:"rgba(200,168,75,0.05)",border:"1px solid "+BORDER}},
@@ -662,10 +680,10 @@ function App(){
        })
      )
    ),
-   e('button',{disabled:!cd.ready||missingIdx,onClick:function(){if(!cd.ready||missingIdx) return; setScreen(roundStarted?"game":"greenorder");},style:{width:"100%",padding:16,background:cd.ready&&!missingIdx?"linear-gradient(135deg,#1a5c1a,#0d3a20)":"rgba(232,127,127,0.08)",border:"2px solid "+(cd.ready&&!missingIdx?GOLD:RED),borderRadius:12,color:cd.ready&&!missingIdx?GOLD:RED,fontSize:16,fontWeight:"bold",letterSpacing:2,cursor:cd.ready&&!missingIdx?"pointer":"not-allowed",fontFamily:"inherit"}},
+   e('button',{disabled:!cd.ready||missingIdx,onClick:function(){if(!cd.ready||missingIdx) return; setScreen(roundStarted||fixedMode?"game":"greenorder"); if(fixedMode)setGreenOrderSet(true);},style:{width:"100%",padding:16,background:cd.ready&&!missingIdx?"linear-gradient(135deg,#1a5c1a,#0d3a20)":"rgba(232,127,127,0.08)",border:"2px solid "+(cd.ready&&!missingIdx?GOLD:RED),borderRadius:12,color:cd.ready&&!missingIdx?GOLD:RED,fontSize:16,fontWeight:"bold",letterSpacing:2,cursor:cd.ready&&!missingIdx?"pointer":"not-allowed",fontFamily:"inherit"}},
      !cd.ready?"⚠️ LLENA LA TARJETA PRIMERO":missingIdx?"INGRESA LOS ÍNDICES":roundStarted?"↩ VOLVER A LA RONDA":"⛳ EMPEZAR RONDA"),
    roundStarted?e('div',{style:{display:"flex",gap:8,marginTop:10}},
-     e('button',{onClick:function(){setScreen("greenorder");},style:Object.assign({},ghostBtn,{flex:1,padding:"10px"})},"🔀 Cambiar orden al green"),
+     !fixedMode?e('button',{onClick:function(){setScreen("greenorder");},style:Object.assign({},ghostBtn,{flex:1,padding:"10px"})},"🔀 Cambiar orden al green"):null,
      e('button',{onClick:function(){if(window.confirm("¿Borrar todos los scores y empezar de cero?")) resetRound();},style:Object.assign({},ghostBtn,{flex:1,padding:"10px",color:RED,border:"1px solid rgba(232,127,127,0.4)"})},"🗑 Reiniciar ronda")
    ):null
  );
@@ -733,7 +751,7 @@ function App(){
        ),
        e('div',{style:{textAlign:"center"}},
          e(HoliLogo,null),
-         e('div',{style:{fontSize:9,color:"#667",letterSpacing:2,marginTop:4}},"T"+(tercio+1)+" · H"+(tercio*6+1)+"-"+(tercio*6+6))
+         e('div',{style:{fontSize:9,color:"#667",letterSpacing:2,marginTop:4}},fixedMode?"PAREJAS FIJAS · 18 HOYOS":"T"+(tercio+1)+" · H"+(tercio*6+1)+"-"+(tercio*6+6))
        ),
        e('div',{style:{textAlign:"right"}},
          e('div',{style:{fontSize:10,color:"#667",letterSpacing:2}},"PARCIAL"),
@@ -751,7 +769,7 @@ function App(){
      showMultiplier?e('div',{style:{position:"fixed",inset:0,background:"rgba(0,0,0,0.92)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,padding:20}},
        e('div',{style:{background:"#0d2137",border:"2px solid "+GOLD,borderRadius:20,padding:24,width:"100%",maxWidth:340,textAlign:"center"}},
          e('div',{style:{fontSize:26,marginBottom:6}},"⚡"),
-         e('div',{style:{fontSize:15,color:GOLD,fontWeight:"bold",marginBottom:4}},"Hoyo "+(currentHoyo+1)+" — Fin Tercio "+(tercio+1)),
+         e('div',{style:{fontSize:15,color:GOLD,fontWeight:"bold",marginBottom:4}},fixedMode?"Hoyo 18 — Cierre de ronda":"Hoyo "+(currentHoyo+1)+" — Fin Tercio "+(tercio+1)),
          e('div',{style:{fontSize:12,color:"#aaa",marginBottom:6}},"¿Cuánto se multiplica este hoyo?"),
          (function(){
            var rawR=calcRaw(currentH,currentHoyo);
@@ -863,6 +881,7 @@ function App(){
  if(screen==="summary"){
    var bal=calcBalance();
    var tercios=[0,1,2].map(function(t){return calcTercio(t);});
+   var totalFixedPoints=0; if(fixedMode){for(var hi=0;hi<18;hi++){var fr=calcEffective(hoyos[hi],hi);if(fr)totalFixedPoints+=fr.pts1;}}
    var tlabels=["Green Order","Residuo","Carritos"];
    var totals=[0,1,2,3].map(function(i){return calcPlayerTotals(i);});
    var ptsPlayers=calcPlayerPoints();
@@ -921,8 +940,13 @@ function App(){
        )
      ),
      e('div',{style:{marginBottom:18}},
-       e('div',{style:{fontSize:11,color:GOLD,letterSpacing:2,marginBottom:8}},"TERCIOS"),
-       tercios.map(function(t,i){
+       e('div',{style:{fontSize:11,color:GOLD,letterSpacing:2,marginBottom:8}},fixedMode?"PARTIDO COMPLETO":"TERCIOS"),
+       fixedMode?e('div',{style:{padding:14,marginBottom:12,background:CARD,border:"1px solid "+GOLD,borderRadius:12}},
+         e('div',{style:{fontSize:12,color:"#aaa",marginBottom:8}},players[carts[0][0]].name+" & "+players[carts[0][1]].name+" vs "+players[carts[1][0]].name+" & "+players[carts[1][1]].name),
+         e('div',{style:{fontSize:26,color:totalFixedPoints>0?GREEN:totalFixedPoints<0?RED:GOLD,fontWeight:"bold"}},(totalFixedPoints>0?"+":"")+totalFixedPoints+" puntos"),
+         e('div',{style:{fontSize:12,color:"#aaa",marginTop:6}},"18 hoyos · Una sola liquidación · $"+(Math.abs(totalFixedPoints)*pointValue+(totalFixedPoints===0?0:baseValue))+" por jugador del equipo ganador")
+       ):null,
+       (fixedMode?[]:tercios).map(function(t,i){
          var tColor=[GREEN,GOLD,PURPLE][i];
          return e('div',{key:i,style:{marginBottom:10,padding:"12px",borderRadius:12,background:CARD,border:"1px solid "+BORDER}},
            e('div',{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}},
