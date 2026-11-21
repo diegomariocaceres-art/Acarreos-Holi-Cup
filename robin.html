@@ -313,7 +313,7 @@ function App(){
    {name:"Jugador 3",hcpIndex:"",tee:"Blue"},
    {name:"Jugador 4",hcpIndex:"",tee:"White"},
  ]); var players=players_[0]; var setPlayers=players_[1];
- var fixedMode_=s(false); var fixedMode=fixedMode_[0]; var setFixedMode=fixedMode_[1];
+ var fixedMode_=s(true); var fixedMode=fixedMode_[0]; var setFixedMode=fixedMode_[1];
  var carts_=s([[0,1],[2,3]]); var carts=carts_[0]; var setCarts=carts_[1];
  var greenOrder_=s([0,1,2,3]); var greenOrder=greenOrder_[0]; var setGreenOrder=greenOrder_[1];
  var greenOrderSet_=s(false); var greenOrderSet=greenOrderSet_[0]; var setGreenOrderSet=greenOrderSet_[1];
@@ -626,7 +626,7 @@ function App(){
    e('div',{style:{marginBottom:14}},
      e('div',{style:{fontSize:11,color:GOLD,letterSpacing:2,marginBottom:8}},"MODALIDAD"),
      e('div',{style:{display:"flex",gap:8,marginBottom:14}},
-       [["Robin",false],["2 vs 2 · 18 hoyos",true]].map(function(opt){
+       [["Robin por tercios",false],["2 vs 2 · 18 hoyos",true]].map(function(opt){
          return e('button',{key:opt[0],onClick:function(){if(anyScores&&!window.confirm("Cambiar modalidad recalcula los resultados existentes. ¿Continuar?"))return;setFixedMode(opt[1]);setShowMultiplier(false);},style:{flex:1,padding:"12px 6px",borderRadius:10,background:fixedMode===opt[1]?"rgba(200,168,75,0.22)":CARD,border:"1px solid "+(fixedMode===opt[1]?GOLD:BORDER),color:fixedMode===opt[1]?GOLD:"#aaa",fontSize:12,cursor:"pointer",fontFamily:"inherit"}},opt[0]);
        })
      ),
