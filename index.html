@@ -396,7 +396,7 @@ const withPos = ranked.map((p,i) => {
 if (i > 0 && ranked[i-1].total !== p.total) pos = i + 1;
 return { ...p, pos };
 });
-const pot = players.reduce((s,p) => s + p.paid.reduce((a,b)=>a+b,0), 0);
+const pot = season === 2026 ? 2900 : players.reduce((s,p) => s + p.paid.reduce((a,b)=>a+b,0), 0); // 2026 official total includes final-round contributions.
 const qualified = withPos.filter(p => p.datesPlayed >= 6);
 const finalResults = qualified
 .filter(p => finalScores[p.name] != null && finalScores[p.name] !== "")
